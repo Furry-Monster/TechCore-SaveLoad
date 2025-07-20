@@ -1,10 +1,11 @@
 using System;
-using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
     public class MonsterSaveMgr : Singleton<MonsterSaveMgr>
     {
+        public string Path { get; set; }
+
         private ISerializer _serializer;
         private IStorage _storage;
 
@@ -14,6 +15,11 @@ namespace MonsterSave.Runtime
         }
 
         public object Load(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T Load<T>(string key)
         {
             throw new NotImplementedException();
         }
