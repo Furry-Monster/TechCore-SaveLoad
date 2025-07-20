@@ -4,10 +4,8 @@ namespace MonsterSave.Runtime
 {
     public class MonsterSaveMgr : Singleton<MonsterSaveMgr>
     {
-        public string Path { get; set; }
-
-        private ISerializer _serializer;
-        private IStorage _storage;
+        private ISerializer _serializer = new Serializer();
+        private IStorage _storage = new Storage();
 
         public void Save(string key, object data)
         {

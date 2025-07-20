@@ -3,10 +3,8 @@ using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
-    public class PlayerPrefsStorage : IStorage
+    public class PlayerPrefsStorage : IKVStorage
     {
-        public string StoragePath { get; } = null;
-
         public void SaveText(string key, string data)
         {
             if (string.IsNullOrEmpty(key))

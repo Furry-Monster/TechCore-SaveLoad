@@ -1,35 +1,24 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using UnityEngine.Device;
 
 namespace MonsterSave.Runtime
 {
-    public class LocalFileStorage : IStorage
+    public class LocalFileStorage : IStreamStorage
     {
-        public string StoragePath { get; private set; }
+        private readonly Storage _storage;
 
-        public LocalFileStorage(string fileName = "save.monster")
+        public LocalFileStorage(Storage storage)
         {
-            if (string.IsNullOrWhiteSpace(fileName))
-                throw new ArgumentException("File name cannot be null or whitespace.", nameof(fileName));
-            StoragePath = Path.Combine(Application.persistentDataPath, fileName);
+            _storage = storage;
         }
 
-        public void SelectPath(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentException("Path cannot be null or whitespace.", nameof(path));
-
-            StoragePath = Path.IsPathRooted(path)
-                ? path
-                : Path.Combine(Application.persistentDataPath, path);
-        }
+        public string StoragePath => _storage.StoragePath;
 
         /// <summary>
         /// 保存文本数据
         /// </summary>
-        public void SaveText(string key, string data)
+        public void SaveText(string data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -47,7 +36,7 @@ namespace MonsterSave.Runtime
         /// <summary>
         /// 保存二进制数据
         /// </summary>
-        public void SaveBinary(string key, byte[] data)
+        public void SaveBinary(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -65,7 +54,7 @@ namespace MonsterSave.Runtime
         /// <summary>
         /// 异步保存文本数据
         /// </summary>
-        public async Task SaveTextAsync(string key, string data)
+        public async Task SaveTextAsync(string data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -83,7 +72,7 @@ namespace MonsterSave.Runtime
         /// <summary>
         /// 异步保存二进制数据
         /// </summary>
-        public async Task SaveBinaryAsync(string key, byte[] data)
+        public async Task SaveBinaryAsync(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -101,7 +90,7 @@ namespace MonsterSave.Runtime
         /// <summary>
         /// 加载文本数据
         /// </summary>
-        public string LoadText(string key)
+        public string LoadText()
         {
             try
             {
@@ -116,7 +105,7 @@ namespace MonsterSave.Runtime
         /// <summary>
         /// 加载二进制数据
         /// </summary>
-        public byte[] LoadBinary(string key)
+        public byte[] LoadBinary()
         {
             try
             {
@@ -131,7 +120,7 @@ namespace MonsterSave.Runtime
         /// <summary>
         /// 异步加载文本数据
         /// </summary>
-        public async Task<string> LoadTextAsync(string key)
+        public async Task<string> LoadTextAsync()
         {
             try
             {
@@ -146,7 +135,7 @@ namespace MonsterSave.Runtime
         /// <summary>
         /// 异步加载二进制数据
         /// </summary>
-        public async Task<byte[]> LoadBinaryAsync(string key)
+        public async Task<byte[]> LoadBinaryAsync()
         {
             try
             {
