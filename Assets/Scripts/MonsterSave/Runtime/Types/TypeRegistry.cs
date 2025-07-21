@@ -4,9 +4,21 @@ using JetBrains.Annotations;
 
 namespace MonsterSave.Runtime
 {
-    public class TypeRegistry
+    public static class TypeRegistry
     {
         private static readonly Dictionary<Type, object> Adapters = new();
+
+        public static void Initialize()
+        {
+            Register(new Vec2Adapter());
+            Register(new Vec3Adapter());
+            Register(new Vec4Adapter());
+            Register(new QuaternionAdapter());
+            Register(new ColorAdapter());
+            Register(new RectAdapter());
+            Register(new BoundsAdapter());
+            Register(new Matrix4x4Adapter());
+        }
 
         public static void Register<TSource, TTarget>([NotNull] ITypeAdapter<TSource, TTarget> adapter)
         {
