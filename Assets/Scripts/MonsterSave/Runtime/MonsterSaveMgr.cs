@@ -9,7 +9,6 @@ namespace MonsterSave.Runtime
 
         public void Save(string key, object data)
         {
-            throw new NotImplementedException();
         }
 
         public object Load(string key)
