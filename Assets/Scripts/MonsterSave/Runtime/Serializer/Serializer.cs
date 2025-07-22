@@ -4,9 +4,16 @@ namespace MonsterSave.Runtime
 {
     public class Serializer : ISerializer
     {
-        public IBinarySerializer BinarySerializer { get; set; } = new DefaultBinarySerializer();
-        public IJSONSerializer JSONSerializer { get; set; } = new DefaultJSONSerializer();
-        public IXMLSerializer XMLSerializer { get; set; } = new DefaultXMLSerializer();
+        private MonsterSaveConfig _config;
+
+        public IBinarySerializer BinarySerializer { get; } = new DefaultBinarySerializer();
+        public IJSONSerializer JSONSerializer { get; } = new DefaultJSONSerializer();
+        public IXMLSerializer XMLSerializer { get; } = new DefaultXMLSerializer();
+
+        public Serializer(MonsterSaveConfig config)
+        {
+            _config = config;
+        }
 
         public byte[] SerializeToBinary(object serializable) => BinarySerializer.Serialize(serializable);
         public string SerializeToJson(object serializable) => JSONSerializer.Serialize(serializable);

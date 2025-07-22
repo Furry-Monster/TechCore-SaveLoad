@@ -5,31 +5,25 @@ namespace MonsterSave.Runtime
 {
     public class MonsterSaveMgr : Singleton<MonsterSaveMgr>
     {
-        private MonsterSaveConfig _config;
-
         private ISerializer _serializer;
         private IStorage _storage;
 
-        public MonsterSaveConfig Config
-        {
-            get => _config;
-            set => _config = value;
-        }
+        public MonsterSaveConfig Config { get; set; }
 
         public MonsterSaveMgr()
         {
             // load default configurations
-            _config = Resources.Load<MonsterSaveConfig>("DefaultConfig");
-            if (_config == null)
+            Config = Resources.Load<MonsterSaveConfig>("DefaultConfig");
+            if (Config == null)
             {
-                _config = ScriptableObject.CreateInstance<MonsterSaveConfig>();
-                _config.name = "DefaultConfig";
+                Config = ScriptableObject.CreateInstance<MonsterSaveConfig>();
+                Config.name = "DefaultConfig";
                 Debug.LogWarning(
-                    $"Can't load default configurations from path <Resources/{_config.name}>,please validate the integrity of the plugin.");
+                    $"Can't load default configurations from path <Resources/{Config.name}>,please validate the integrity of the plugin.");
             }
 
-            _serializer = new Serializer();
-            _storage = new Storage();
+            _serializer = new Serializer(Config);
+            _storage = new Storage(Config);
             TypeRegistry.Initialize();
         }
 

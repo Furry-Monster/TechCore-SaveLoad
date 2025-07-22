@@ -1,6 +1,6 @@
 namespace MonsterSave.Runtime
 {
-    public interface IKVStorage
+    public interface IStorageMedia
     {
         void SaveText(string key, string data);
         void SaveBinary(string key, byte[] data);

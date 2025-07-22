@@ -1,42 +1,73 @@
 using System;
-using System.IO;
-using UnityEngine;
+using System.Collections.Generic;
 
 namespace MonsterSave.Runtime
 {
     public class Storage : IStorage
     {
-        public string StoragePath { get; private set; }
+        public IStorageMedia StorageMedia { get; } = null;
 
-        public IKVStorage KVStorage { get; set; }
-        public IStreamStorage StreamStorage { get; set; }
+        private MonsterSaveConfig _config;
+        private Dictionary<string, string> _textData;
+        private Dictionary<string, byte[]> _binaryData;
 
         public Storage()
         {
-            StoragePath = Path.Combine(Application.persistentDataPath, "monster.save");
-
-            KVStorage = new PlayerPrefsStorage();
-            StreamStorage = new LocalFileStorage(this);
+            _textData = new Dictionary<string, string>();
+            _binaryData = new Dictionary<string, byte[]>();
         }
 
-        public void SaveText(string data) => StreamStorage.SaveText(data);
-        public void SaveText(string key, string data) => KVStorage.SaveText(key, data);
-        public void SaveBinary(byte[] data) => StreamStorage.SaveBinary(data);
-        public void SaveBinary(string key, byte[] data) => KVStorage.SaveBinary(key, data);
-
-        public string LoadText() => StreamStorage.LoadText();
-        public string LoadText(string key) => KVStorage.LoadText(key);
-        public byte[] LoadBinary() => StreamStorage.LoadBinary();
-        public byte[] LoadBinary(string key) => KVStorage.LoadBinary(key);
-
-        public void SelectStoragePath(string path)
+        public Storage(MonsterSaveConfig config)
         {
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentException("Path cannot be null or whitespace.", nameof(path));
+            _config = config;
 
-            StoragePath = Path.IsPathRooted(path)
-                ? path
-                : Path.Combine(Application.persistentDataPath, path);
+            _textData = new Dictionary<string, string>();
+            _binaryData = new Dictionary<string, byte[]>();
+        }
+
+        public void UpdateConfig(MonsterSaveConfig config = null)
+        {
+            if (config == null)
+                config = _config;
+
+            _config = config;
+
+            var media = config.media;
+            var path = config.storagePath;
+        }
+
+        public void SaveText(string key, string data)
+        {
+        }
+
+        public void SaveBinary(string key, byte[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string LoadText(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] LoadBinary(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool SyncText()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool SyncBinary()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool SyncAll()
+        {
+            throw new NotImplementedException();
         }
     }
 }

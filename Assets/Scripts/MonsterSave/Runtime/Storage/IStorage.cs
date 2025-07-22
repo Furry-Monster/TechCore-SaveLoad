@@ -4,19 +4,15 @@ namespace MonsterSave.Runtime
 {
     public interface IStorage
     {
-        public IKVStorage KVStorage { get; set; }
-        public IStreamStorage StreamStorage { get; set; }
+        public IStorageMedia StorageMedia { get; }
 
-        void SaveText(string data);
+        void UpdateConfig(MonsterSaveConfig config = null);
         void SaveText([NotNull] string key, string data);
-        void SaveBinary(byte[] data);
         void SaveBinary([NotNull] string key, byte[] data);
-
-        string LoadText();
         string LoadText([NotNull] string key);
-        byte[] LoadBinary();
         byte[] LoadBinary([NotNull] string key);
-
-        void SelectStoragePath(string path);
+        bool SyncText();
+        bool SyncBinary();
+        bool SyncAll();
     }
 }

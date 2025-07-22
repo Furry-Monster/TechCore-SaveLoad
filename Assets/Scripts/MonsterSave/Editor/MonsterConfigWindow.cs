@@ -1,275 +1,302 @@
 using MonsterSave.Runtime;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.GUILayout;
 
-public class MonsterConfigWindow : EditorWindow
+namespace MonsterSave.Editor
 {
-    private enum State
+    public class MonsterConfigWindow : EditorWindow
     {
-        None,
-        Creating,
-        Modifying,
-    }
-
-    private MonsterSaveConfig _selectedConfig;
-    private State _currentState = State.None;
-    private Vector2 _scrollPos;
-
-    [MenuItem("Tools/MonsterSave/PluginConfig")]
-    public static void ShowWindow()
-    {
-        EditorWindow.GetWindow<MonsterConfigWindow>("MonsterSave Config");
-    }
-
-    private void Awake()
-    {
-        if (_selectedConfig == null)
+        private enum State
         {
-            // ³¢ÊÔ¼ÓÔØÄ¬ÈÏÅäÖÃ
-            _selectedConfig = Resources.Load<MonsterSaveConfig>("DefaultConfig");
+            None,
+            Creating,
+            Modifying,
         }
-    }
 
-    private void OnGUI()
-    {
-        GUILayout.Label("MonsterSave Configuration", EditorStyles.boldLabel);
+        private MonsterSaveConfig _selectedConfig;
+        private State _currentState = State.None;
+        private Vector2 _scrollPos;
 
-        if (_currentState == State.Modifying)
+        [MenuItem("Tools/MonsterSave/PluginConfig")]
+        public static void ShowWindow()
         {
-            // ¼ì²éÊÇ·ñÑ¡ÔñÁËÅäÖÃ
+            GetWindow<MonsterConfigWindow>("MonsterSave Config");
+        }
+
+        private void Awake()
+        {
             if (_selectedConfig == null)
             {
-                Debug.LogWarning("Ã»ÓĞÑ¡ÔñÅäÖÃÎÄ¼ş.");
+                // å°è¯•åŠ è½½é»˜è®¤é…ç½®
+                _selectedConfig = Resources.Load<MonsterSaveConfig>("DefaultConfig");
+            }
+        }
+
+        private void OnGUI()
+        {
+            Label("MonsterSave Configuration", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+
+            switch (_currentState)
+            {
+                case State.Modifying:
+                {
+                    // æ£€æŸ¥æ˜¯å¦é€‰æ‹©äº†é…ç½®
+                    if (!_selectedConfig)
+                    {
+                        // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                        Debug.LogWarning("æ²¡æœ‰é€‰æ‹©é…ç½®æ–‡ä»¶.");
+                        _currentState = State.None;
+                    }
+
+                    // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                    ShowModifyView();
+                    break;
+                }
+                case State.Creating:
+                    ShowCreatingView();
+                    break;
+                case State.None:
+                default:
+                    ShowMainView();
+                    break;
+            }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void ShowMainView()
+        {
+            // é…ç½®ç®¡ç†
+            Label("é…ç½®ç®¡ç†", EditorStyles.boldLabel);
+            _selectedConfig = EditorGUILayout.ObjectField(
+                "å½“å‰é…ç½®",
+                _selectedConfig,
+                typeof(MonsterSaveConfig),
+                false) as MonsterSaveConfig;
+            EditorGUILayout.BeginHorizontal();
+            if (Button("æ–°å»ºé…ç½®", Width(100)))
+            {
+                _currentState = State.Creating;
+            }
+
+            if (Button("ä¿®æ”¹å½“å‰", Width(100)))
+            {
+                _currentState = State.Modifying;
+            }
+
+            if (Button("åˆ é™¤é…ç½®", Width(100)))
+            {
+                if (EditorUtility.DisplayDialog("ç¡®è®¤åˆ é™¤", $"ç¡®å®šè¦åˆ é™¤é…ç½® {_selectedConfig?.name} å—ï¼Ÿ", "åˆ é™¤", "å–æ¶ˆ"))
+                {
+                    DeleteConfig(_selectedConfig);
+                }
+            }
+
+            EditorGUILayout.EndHorizontal();
+
+            // æ‚é¡¹åŠŸèƒ½
+            Label("æ‚é¡¹", EditorStyles.boldLabel);
+            if (Button("æ’ä»¶æµ‹è¯•"))
+            {
+                TestSaveLoad(_selectedConfig);
+            }
+
+            if (Button("æ‰“å¼€å¸®åŠ©æ–‡æ¡£"))
+            {
+                Application.OpenURL("https://github.com/your-plugin-doc-url");
+            }
+
+            Label("æ’ä»¶ç‰ˆæœ¬: 0.0.1", EditorStyles.miniLabel);
+        }
+
+        private string _createdFileName;
+        private Format _createdFormat;
+        private Media _createdMedia;
+        private Encryption _createdEncryption;
+        private string _createdStoragePath;
+        private string _createdApiKey;
+        private bool _createdScheduledSync;
+        private bool _createdTypeCache;
+        private bool _createdInitialized = false;
+
+        private void ShowCreatingView()
+        {
+            if (!_createdInitialized)
+            {
+                _createdFileName = "MonsterSaveConfig.asset";
+                _createdFormat = _selectedConfig.format;
+                _createdMedia = _selectedConfig.media;
+                _createdEncryption = _selectedConfig.encryption;
+                _createdStoragePath = _selectedConfig.storagePath;
+                _createdApiKey = _selectedConfig.apiKey;
+                _createdScheduledSync = _selectedConfig.scheduledSync;
+                _createdTypeCache = _selectedConfig.typeCache;
+                _createdInitialized = true;
+            }
+
+            EditorGUI.BeginChangeCheck();
+
+            Label("æ–°å»ºé…ç½®", EditorStyles.boldLabel);
+            _createdFileName = EditorGUILayout.TextField("é…ç½®æ–‡ä»¶å", _createdFileName);
+
+            Label("General", EditorStyles.boldLabel);
+            _createdFormat = (Format)EditorGUILayout.EnumPopup("åºåˆ—åŒ–æ ¼å¼", _createdFormat);
+            _createdMedia = (Media)EditorGUILayout.EnumPopup("å­˜å‚¨ä»‹è´¨", _createdMedia);
+            _createdEncryption = (Encryption)EditorGUILayout.EnumPopup("åŠ å¯†æ ¼å¼", _createdEncryption);
+            _createdStoragePath = EditorGUILayout.TextField("å­˜å‚¨è·¯å¾„", _createdStoragePath);
+            _createdApiKey = EditorGUILayout.TextField("API Key", _createdApiKey);
+
+            Label("Advanced", EditorStyles.boldLabel);
+            _createdScheduledSync = EditorGUILayout.Toggle("å®šæ—¶ä¿å­˜", _createdScheduledSync);
+            _createdTypeCache = EditorGUILayout.Toggle("ç±»å‹ç¼“å­˜", _createdTypeCache);
+
+            BeginHorizontal();
+            if (Button("ä¿å­˜"))
+            {
+                var path = EditorUtility.SaveFilePanelInProject(
+                    "ä¿å­˜MonsterSaveé…ç½®",
+                    _createdFileName,
+                    "asset",
+                    "è¯·é€‰æ‹©ä¿å­˜é…ç½®çš„è·¯å¾„"
+                );
+
+                var newConfig = CreateInstance<MonsterSaveConfig>();
+
+                if (!string.IsNullOrEmpty(path))
+                {
+                    // å†™å›æ‰€æœ‰å­—æ®µï¼Œç¡®ä¿æœ€æ–°
+                    newConfig.format = _createdFormat;
+                    newConfig.media = _createdMedia;
+                    newConfig.encryption = _createdEncryption;
+                    newConfig.storagePath = _createdStoragePath;
+                    newConfig.apiKey = _createdApiKey;
+                    newConfig.scheduledSync = _createdScheduledSync;
+                    newConfig.typeCache = _createdTypeCache;
+
+                    EditorUtility.SetDirty(newConfig);
+                    AssetDatabase.CreateAsset(newConfig, path);
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+                    EditorUtility.DisplayDialog("æˆåŠŸ", "æ–°é…ç½®å·²ä¿å­˜", "ç¡®å®š");
+                    _currentState = State.None;
+
+                    // é‡æ–°åŠ è½½å·²ä¿å­˜çš„é…ç½®
+                    _selectedConfig = AssetDatabase.LoadAssetAtPath<MonsterSaveConfig>(path);
+                }
+            }
+
+            if (Button("å–æ¶ˆ"))
+            {
                 _currentState = State.None;
             }
 
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-            ShowModifyView();
-            EditorGUILayout.Space();
-            EditorGUILayout.EndScrollView();
+            EndHorizontal();
         }
-        else if (_currentState == State.Creating)
-        {
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-            ShowCreatingView();
-            EditorGUILayout.Space();
-            EditorGUILayout.EndScrollView();
-        }
-        else
-        {
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-            ShowMainView();
 
-            EditorGUILayout.Space();
-            EditorGUILayout.EndScrollView();
-        }
-    }
+        private Format _editFormat;
+        private Media _editMedia;
+        private Encryption _editEncryption;
+        private string _editStoragePath;
+        private string _editApiKey;
+        private bool _editScheduledSync;
+        private bool _editTypeCache;
+        private bool _editInitialized = false;
 
-    private void ShowMainView()
-    {
-        // ÅäÖÃ¹ÜÀí
-        GUILayout.Label("ÅäÖÃ¹ÜÀí", EditorStyles.boldLabel);
-        _selectedConfig = EditorGUILayout.ObjectField(
-            "µ±Ç°ÅäÖÃ",
-            _selectedConfig,
-            typeof(MonsterSaveConfig),
-            false) as MonsterSaveConfig;
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("ĞÂ½¨ÅäÖÃ", GUILayout.Width(100)))
+        private void ShowModifyView()
         {
-            _currentState = State.Creating;
-        }
-        if (GUILayout.Button("ĞŞ¸Äµ±Ç°", GUILayout.Width(100)))
-        {
-            _currentState = State.Modifying;
-        }
-        if (GUILayout.Button("É¾³ıÅäÖÃ", GUILayout.Width(100)))
-        {
-            if (EditorUtility.DisplayDialog("È·ÈÏÉ¾³ı", $"È·¶¨ÒªÉ¾³ıÅäÖÃ {_selectedConfig.name} Âğ£¿", "É¾³ı", "È¡Ïû"))
+            if (!_selectedConfig)
+                return;
+
+            if (!_editInitialized)
             {
-                DeleteConfig(_selectedConfig);
+                _editFormat = _selectedConfig.format;
+                _editMedia = _selectedConfig.media;
+                _editEncryption = _selectedConfig.encryption;
+                _editStoragePath = _selectedConfig.storagePath;
+                _editApiKey = _selectedConfig.apiKey;
+                _editScheduledSync = _selectedConfig.scheduledSync;
+                _editTypeCache = _selectedConfig.typeCache;
+                _editInitialized = true;
             }
-        }
-        EditorGUILayout.EndHorizontal();
 
-        // ÔÓÏî¹¦ÄÜ
-        GUILayout.Label("ÔÓÏî", EditorStyles.boldLabel);
-        if (GUILayout.Button("²å¼ş²âÊÔ"))
-        {
-            TestSaveLoad(_selectedConfig);
-        }
-        if (GUILayout.Button("´ò¿ª°ïÖúÎÄµµ"))
-        {
-            Application.OpenURL("https://github.com/your-plugin-doc-url");
-        }
-        GUILayout.Label("²å¼ş°æ±¾: 0.0.1", EditorStyles.miniLabel);
-    }
+            EditorGUI.BeginChangeCheck();
 
-    private string _createdFileName;
-    private Format _createdFormat;
-    private Media _createdMedia;
-    private Encryption _createdEncryption;
-    private string _createdStoragePath;
-    private bool _createdScheduledSync;
-    private bool _createdTypeCache;
-    private bool _createdInitialized = false;
+            // General
+            Label("General", EditorStyles.boldLabel);
+            _editFormat = (Format)EditorGUILayout.EnumPopup("åºåˆ—åŒ–æ ¼å¼", _editFormat);
+            _editMedia = (Media)EditorGUILayout.EnumPopup("å­˜å‚¨ä»‹è´¨", _editMedia);
+            _editEncryption = (Encryption)EditorGUILayout.EnumPopup("åŠ å¯†æ ¼å¼", _editEncryption);
+            _editStoragePath = EditorGUILayout.TextField("å­˜å‚¨è·¯å¾„", _editStoragePath);
+            _editApiKey = EditorGUILayout.TextField("API Key", _editApiKey);
 
-    private void ShowCreatingView()
-    {
-        if (!_createdInitialized)
-        {
-            _createdFileName = "MonsterSaveConfig.asset";
-            _createdFormat = _selectedConfig.format;
-            _createdMedia = _selectedConfig.media;
-            _createdEncryption = _selectedConfig.encryption;
-            _createdStoragePath = _selectedConfig.storagePath;
-            _createdScheduledSync = _selectedConfig.scheduledSync;
-            _createdTypeCache = _selectedConfig.typeCache;
-            _createdInitialized = true;
-        }
+            // Advanced
+            Label("Advanced", EditorStyles.boldLabel);
+            _editScheduledSync = EditorGUILayout.Toggle("å®šæ—¶ä¿å­˜", _editScheduledSync);
+            _editTypeCache = EditorGUILayout.Toggle("ç±»å‹ç¼“å­˜", _editTypeCache);
 
-        EditorGUI.BeginChangeCheck();
-
-        GUILayout.Label("ĞÂ½¨ÅäÖÃ", EditorStyles.boldLabel);
-        _createdFileName = EditorGUILayout.TextField("ÅäÖÃÎÄ¼şÃû", _createdFileName);
-
-        GUILayout.Label("General", EditorStyles.boldLabel);
-        _createdFormat = (Format)EditorGUILayout.EnumPopup("ĞòÁĞ»¯¸ñÊ½", _createdFormat);
-        _createdMedia = (Media)EditorGUILayout.EnumPopup("´æ´¢½éÖÊ", _createdMedia);
-        _createdEncryption = (Encryption)EditorGUILayout.EnumPopup("¼ÓÃÜ¸ñÊ½", _createdEncryption);
-        _createdStoragePath = EditorGUILayout.TextField("´æ´¢Â·¾¶", _createdStoragePath);
-
-        GUILayout.Label("Advanced", EditorStyles.boldLabel);
-        _createdScheduledSync = EditorGUILayout.Toggle("¶¨Ê±±£´æ", _createdScheduledSync);
-        _createdTypeCache = EditorGUILayout.Toggle("ÀàĞÍ»º´æ", _createdTypeCache);
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("±£´æ"))
-        {
-            string path = EditorUtility.SaveFilePanelInProject(
-                "±£´æMonsterSaveÅäÖÃ",
-                _createdFileName,
-                "asset",
-                "ÇëÑ¡Ôñ±£´æÅäÖÃµÄÂ·¾¶"
-            );
-
-            var newConfig = ScriptableObject.CreateInstance<MonsterSaveConfig>();
-
-            if (!string.IsNullOrEmpty(path))
+            BeginHorizontal();
+            if (Button("ä¿å­˜"))
             {
-                // Ğ´»ØËùÓĞ×Ö¶Î£¬È·±£×îĞÂ
-                EditorUtility.SetDirty(newConfig);
-                AssetDatabase.CreateAsset(newConfig, path);
+                // åªæœ‰ç‚¹å‡»ä¿å­˜æ‰å†™å›
+                _selectedConfig.format = _editFormat;
+                _selectedConfig.media = _editMedia;
+                _selectedConfig.encryption = _editEncryption;
+                _selectedConfig.storagePath = _editStoragePath;
+                _selectedConfig.scheduledSync = _editScheduledSync;
+                _selectedConfig.typeCache = _editTypeCache;
+
+                EditorUtility.SetDirty(_selectedConfig);
                 AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-                EditorUtility.DisplayDialog("³É¹¦", "ĞÂÅäÖÃÒÑ±£´æ", "È·¶¨");
+                // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                Debug.Log($"æˆåŠŸä¿å­˜ä¿®æ”¹åçš„é…ç½®åˆ° {_selectedConfig.name}.");
                 _currentState = State.None;
-
-                // ÖØĞÂ¼ÓÔØÒÑ±£´æµÄÅäÖÃ
-                _selectedConfig = AssetDatabase.LoadAssetAtPath<MonsterSaveConfig>(path);
+                _editInitialized = false;
             }
+
+            if (Button("å–æ¶ˆ"))
+            {
+                _currentState = State.None;
+                _editInitialized = false;
+            }
+
+            EndHorizontal();
         }
 
-        if (GUILayout.Button("È¡Ïû"))
+        private void DeleteConfig(MonsterSaveConfig config)
         {
-            _currentState = State.None;
-        }
-        GUILayout.EndHorizontal();
-    }
+            if (config.name == "DefaultConfig")
+            {
+                EditorUtility.DisplayDialog("é”™è¯¯", "é»˜è®¤é…ç½®ä¸èƒ½åˆ é™¤", "ç¡®å®š");
+                return;
+            }
 
-    private Format _editFormat;
-    private Media _editMedia;
-    private Encryption _editEncryption;
-    private string _editStoragePath;
-    private bool _editScheduledSync;
-    private bool _editTypeCache;
-    private bool _editInitialized = false;
-
-    private void ShowModifyView()
-    {
-        if (_selectedConfig == null)
-            return;
-
-        if (!_editInitialized)
-        {
-            _editFormat = _selectedConfig.format;
-            _editMedia = _selectedConfig.media;
-            _editEncryption = _selectedConfig.encryption;
-            _editStoragePath = _selectedConfig.storagePath;
-            _editScheduledSync = _selectedConfig.scheduledSync;
-            _editTypeCache = _selectedConfig.typeCache;
-            _editInitialized = true;
-        }
-
-        EditorGUI.BeginChangeCheck();
-
-        // General
-        GUILayout.Label("General", EditorStyles.boldLabel);
-        _editFormat = (Format)EditorGUILayout.EnumPopup("ĞòÁĞ»¯¸ñÊ½", _editFormat);
-        _editMedia = (Media)EditorGUILayout.EnumPopup("´æ´¢½éÖÊ", _editMedia);
-        _editEncryption = (Encryption)EditorGUILayout.EnumPopup("¼ÓÃÜ¸ñÊ½", _editEncryption);
-        _editStoragePath = EditorGUILayout.TextField("´æ´¢Â·¾¶", _editStoragePath);
-
-        // Advanced
-        GUILayout.Label("Advanced", EditorStyles.boldLabel);
-        _editScheduledSync = EditorGUILayout.Toggle("¶¨Ê±±£´æ", _editScheduledSync);
-        _editTypeCache = EditorGUILayout.Toggle("ÀàĞÍ»º´æ", _editTypeCache);
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("±£´æ"))
-        {
-            // Ö»ÓĞµã»÷±£´æ²ÅĞ´»Ø
-            _selectedConfig.format = _editFormat;
-            _selectedConfig.media = _editMedia;
-            _selectedConfig.encryption = _editEncryption;
-            _selectedConfig.storagePath = _editStoragePath;
-            _selectedConfig.scheduledSync = _editScheduledSync;
-            _selectedConfig.typeCache = _editTypeCache;
-
-            EditorUtility.SetDirty(_selectedConfig);
+            var path = AssetDatabase.GetAssetPath(config);
+            AssetDatabase.DeleteAsset(path);
             AssetDatabase.SaveAssets();
-            Debug.Log($"³É¹¦±£´æĞŞ¸ÄºóµÄÅäÖÃµ½ {_selectedConfig.name}.");
-            _currentState = State.None;
-            _editInitialized = false;
+            AssetDatabase.Refresh();
+            _selectedConfig = null;
+            EditorUtility.DisplayDialog("æˆåŠŸ", "é…ç½®å·²åˆ é™¤", "ç¡®å®š");
         }
-        if (GUILayout.Button("È¡Ïû"))
+
+        private void TestSaveLoad(MonsterSaveConfig config)
         {
-            _currentState = State.None;
-            _editInitialized = false;
+            if (!config)
+            {
+                EditorUtility.DisplayDialog("é”™è¯¯", "æœªé€‰æ‹©é…ç½®", "ç¡®å®š");
+                return;
+            }
+
+            // è¿™é‡Œä»…åšç®€å•æ¨¡æ‹Ÿ
+            var json = JsonUtility.ToJson(config);
+            var temp = CreateInstance<MonsterSaveConfig>();
+            JsonUtility.FromJsonOverwrite(json, temp);
+            EditorUtility.DisplayDialog("æµ‹è¯•ç»“æœ", $"ä¿å­˜/åŠ è½½æ¨¡æ‹ŸæˆåŠŸ\n{json}", "ç¡®å®š");
+            DestroyImmediate(temp);
         }
-        GUILayout.EndHorizontal();
-    }
-
-    private void DeleteConfig(MonsterSaveConfig config)
-    {
-        if (config.name == "DefaultConfig")
-        {
-            EditorUtility.DisplayDialog("´íÎó", "Ä¬ÈÏÅäÖÃ²»ÄÜÉ¾³ı", "È·¶¨");
-            return;
-        }
-
-        string path = AssetDatabase.GetAssetPath(config);
-        AssetDatabase.DeleteAsset(path);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-        _selectedConfig = null;
-        EditorUtility.DisplayDialog("³É¹¦", "ÅäÖÃÒÑÉ¾³ı", "È·¶¨");
-    }
-
-    private void TestSaveLoad(MonsterSaveConfig config)
-    {
-        if (config == null)
-        {
-            EditorUtility.DisplayDialog("´íÎó", "Î´Ñ¡ÔñÅäÖÃ", "È·¶¨");
-            return;
-        }
-
-        // ÕâÀï½ö×ö¼òµ¥Ä£Äâ
-        string json = JsonUtility.ToJson(config);
-        var temp = ScriptableObject.CreateInstance<MonsterSaveConfig>();
-        JsonUtility.FromJsonOverwrite(json, temp);
-        EditorUtility.DisplayDialog("²âÊÔ½á¹û", $"±£´æ/¼ÓÔØÄ£Äâ³É¹¦\n{json}", "È·¶¨");
-        DestroyImmediate(temp);
     }
 }

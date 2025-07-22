@@ -1,13 +1,13 @@
-using JetBrains.Annotations;
 using System;
+using JetBrains.Annotations;
 
 namespace MonsterSave.Runtime
 {
     public interface ISerializer
     {
-        public IBinarySerializer BinarySerializer { get; set; }
-        public IJSONSerializer JSONSerializer { get; set; }
-        public IXMLSerializer XMLSerializer { get; set; }
+        public IBinarySerializer BinarySerializer { get; }
+        public IJSONSerializer JSONSerializer { get; }
+        public IXMLSerializer XMLSerializer { get; }
 
         byte[] SerializeToBinary(object serializable);
         string SerializeToJson(object serializable);
