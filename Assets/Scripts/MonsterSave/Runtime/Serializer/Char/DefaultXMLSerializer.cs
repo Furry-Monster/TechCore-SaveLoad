@@ -8,10 +8,13 @@ namespace MonsterSave.Runtime
     /// <summary>
     /// 默认XML序列化器，使用System.Xml
     /// </summary>
-    public class DefaultXMLSerializer : IXMLSerializer
+    public class DefaultXMLSerializer : CharSerializer
     {
-        public string Serialize(object serializable)
+        public override string Serialize(object serializable)
         {
+            if (serializable == null || !serializable.GetType().IsSerializable)
+                return null;
+
             var serializer = new XmlSerializer(serializable.GetType());
             using var stringWriter = new StringWriter();
             using var xmlWriter = XmlWriter.Create(stringWriter,
@@ -24,11 +27,24 @@ namespace MonsterSave.Runtime
             return stringWriter.ToString();
         }
 
-        public object Deserialize(Type type, string xml)
+        public override object Deserialize(Type type, string xml)
         {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+
             var serializer = new XmlSerializer(type);
             using var stringReader = new StringReader(xml);
             return serializer.Deserialize(stringReader);
+        }
+
+        public override T Deserialize<T>(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return default;
+
+            var serializer = new XmlSerializer(typeof(T));
+            using var stringReader = new StringReader(xml);
+            return (T)serializer.Deserialize(stringReader);
         }
     }
 }

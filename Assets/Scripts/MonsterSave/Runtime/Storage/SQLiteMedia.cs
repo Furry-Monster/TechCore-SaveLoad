@@ -1,33 +1,35 @@
 using System;
-using System.Collections.Generic;
 
 namespace MonsterSave.Runtime
 {
     public class SQLiteMedia : IStorageMedia
     {
-        public Storage Storage { private get; set; }
-
-        public SQLiteMedia(Storage storage)
-        {
-            Storage = storage;
-        }
-
-        public void SaveString(Dictionary<string, string> data)
+        public void WriteAllText(string content)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveBytes(Dictionary<string, byte[]> data)
+        public string ReadAllText()
         {
             throw new NotImplementedException();
         }
 
-        public Dictionary<string, string> LoadString()
+        public void WriteAllBytes(byte[] bytes)
         {
             throw new NotImplementedException();
         }
 
-        public Dictionary<string, byte[]> LoadBytes()
+        public byte[] ReadAllBytes()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Exists()
         {
             throw new NotImplementedException();
         }
