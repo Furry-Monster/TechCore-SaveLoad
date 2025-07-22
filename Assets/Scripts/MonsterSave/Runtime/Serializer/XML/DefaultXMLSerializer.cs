@@ -12,9 +12,6 @@ namespace MonsterSave.Runtime
     {
         public string Serialize(object serializable)
         {
-            if (serializable == null)
-                return null;
-
             var serializer = new XmlSerializer(serializable.GetType());
             using var stringWriter = new StringWriter();
             using var xmlWriter = XmlWriter.Create(stringWriter,
@@ -29,8 +26,6 @@ namespace MonsterSave.Runtime
 
         public object Deserialize(Type type, string xml)
         {
-            if (string.IsNullOrEmpty(xml))
-                return null;
             var serializer = new XmlSerializer(type);
             using var stringReader = new StringReader(xml);
             return serializer.Deserialize(stringReader);

@@ -22,7 +22,7 @@ namespace MonsterSave.Runtime
                     $"Can't load default configurations from path <Resources/{Config.name}>,please validate the integrity of the plugin.");
             }
 
-            _serializer = new Serializer(Config);
+            _serializer = new Serializer();
             _storage = new Storage(Config);
             TypeRegistry.Initialize();
         }

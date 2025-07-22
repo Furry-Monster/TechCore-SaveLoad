@@ -10,15 +10,11 @@ namespace MonsterSave.Runtime
     {
         public string Serialize(object serializable)
         {
-            if (serializable == null)
-                return null;
             return JsonUtility.ToJson(serializable);
         }
 
         public object Deserialize(Type type, string json)
         {
-            if (string.IsNullOrEmpty(json))
-                return null;
             return JsonUtility.FromJson(json, type);
         }
     }

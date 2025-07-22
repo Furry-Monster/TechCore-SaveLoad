@@ -11,8 +11,6 @@ namespace MonsterSave.Runtime
         void SaveBinary([NotNull] string key, byte[] data);
         string LoadText([NotNull] string key);
         byte[] LoadBinary([NotNull] string key);
-        bool SyncText();
-        bool SyncBinary();
-        bool SyncAll();
+        bool Sync();
     }
 }

@@ -1,25 +1,26 @@
 using System;
+using System.Collections.Generic;
 
 namespace MonsterSave.Runtime
 {
     public class CloudStorageMedia : IStorageMedia
     {
-        public void SaveText(string key, string data)
+        public void SaveString(Dictionary<string, string> data)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveBinary(string key, byte[] data)
+        public void SaveBytes(Dictionary<string, byte[]> data)
         {
             throw new NotImplementedException();
         }
 
-        public string LoadText(string key)
+        public Dictionary<string, string> LoadString()
         {
             throw new NotImplementedException();
         }
 
-        public byte[] LoadBinary(string key)
+        public Dictionary<string, byte[]> LoadBytes()
         {
             throw new NotImplementedException();
         }
