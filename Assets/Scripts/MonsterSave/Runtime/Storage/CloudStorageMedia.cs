@@ -5,6 +5,13 @@ namespace MonsterSave.Runtime
 {
     public class CloudStorageMedia : IStorageMedia
     {
+        public Storage Storage { private get; set; }
+
+        public CloudStorageMedia(Storage storage)
+        {
+            Storage = storage;
+        }
+
         public void SaveString(Dictionary<string, string> data)
         {
             throw new NotImplementedException();
