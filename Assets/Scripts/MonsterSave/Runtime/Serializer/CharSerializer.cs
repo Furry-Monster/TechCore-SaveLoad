@@ -15,8 +15,7 @@ namespace MonsterSave.Runtime
             if (!obj.GetType().IsSerializable)
                 throw new InvalidCastException($"{obj.GetType().FullName} is not [Serializable].");
 
-            var adapted = TypeRegistry.AdaptToSerializable(obj);
-            var content = Serialize(adapted);
+            var content = Serialize(obj);
             return Encoding.UTF8.GetBytes(content, 0, content.Length);
         }
 
@@ -30,8 +29,7 @@ namespace MonsterSave.Runtime
                 return null;
 
             var content = Encoding.UTF8.GetString(data, 0, data.Length);
-            var serializable = Deserialize(type, content);
-            return TypeRegistry.AdaptFromSerializable(serializable);
+            return Deserialize(type, content);
         }
 
 
