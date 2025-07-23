@@ -28,16 +28,5 @@ namespace MonsterSave.Runtime
 
             return formatter.Deserialize(memoryStream);
         }
-
-        protected override T Deserialize<T>(byte[] bytes)
-        {
-            if (bytes == null || bytes.Length == 0)
-                return default;
-
-            var formatter = new BinaryFormatter();
-            using var memoryStream = new MemoryStream(bytes);
-
-            return (T)formatter.Deserialize(memoryStream);
-        }
     }
 }

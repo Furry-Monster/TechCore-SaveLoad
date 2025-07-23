@@ -36,15 +36,5 @@ namespace MonsterSave.Runtime
             using var stringReader = new StringReader(xml);
             return serializer.Deserialize(stringReader);
         }
-
-        protected override T Deserialize<T>(string xml)
-        {
-            if (string.IsNullOrEmpty(xml))
-                return default;
-
-            var serializer = new XmlSerializer(typeof(T));
-            using var stringReader = new StringReader(xml);
-            return (T)serializer.Deserialize(stringReader);
-        }
     }
 }

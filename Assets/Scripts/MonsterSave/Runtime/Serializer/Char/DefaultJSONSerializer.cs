@@ -23,13 +23,5 @@ namespace MonsterSave.Runtime
 
             return JsonUtility.FromJson(json, type);
         }
-
-        protected override T Deserialize<T>(string json)
-        {
-            if (string.IsNullOrEmpty(json))
-                return default;
-
-            return JsonUtility.FromJson<T>(json);
-        }
     }
 }

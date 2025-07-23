@@ -52,39 +52,48 @@ namespace MonsterSave.Runtime
                 }
             }
 
-            if (typeof(TSource).IsClass)
-            {
-            }
-
             if (Adapters.ContainsKey(typeof(TSource)))
                 Adapters[typeof(TSource)] = adapter;
             else
                 Adapters.Add(typeof(TSource), adapter);
         }
 
-        public static ITypeAdapter<TSource, TTarget> GetAdapter<TSource, TTarget>()
-        {
-            return Adapters.TryGetValue(typeof(TSource), out var adapter)
+        public static ITypeAdapter GetAdapter<TSource>(TSource type) =>
+            Adapters.TryGetValue(typeof(TSource), out var adapter)
+                ? (ITypeAdapter)adapter
+                : null;
+
+        public static ITypeAdapter<TSource, TTarget> GetAdapter<TSource, TTarget>() =>
+            Adapters.TryGetValue(typeof(TSource), out var adapter)
                 ? (ITypeAdapter<TSource, TTarget>)adapter
                 : null;
-        }
 
-        public static bool HasAdapter<TSource>() => Adapters.ContainsKey(typeof(TSource));
+        public static bool HasAdapter(Type sourceType) => Adapters.ContainsKey(sourceType);
+
+        public static object AdaptToSerializable(object obj)
+        {
+            throw new NotImplementedException();
+        }
 
         public static TTarget AdaptToSerializable<TSource, TTarget>(TSource source)
         {
             var adapter = GetAdapter<TSource, TTarget>();
             if (adapter == null || source == null)
-                return default(TTarget);
+                return default;
 
             return adapter.ConvertToSerializable(source);
+        }
+
+        public static object AdaptFromSerializable(object obj)
+        {
+            throw new NotImplementedException();
         }
 
         public static TSource AdaptFromSerializable<TSource, TTarget>(TTarget target)
         {
             var adapter = GetAdapter<TSource, TTarget>();
             if (adapter == null || target == null)
-                return default(TSource);
+                return default;
 
             return adapter.ConvertFromSerializable(target);
         }

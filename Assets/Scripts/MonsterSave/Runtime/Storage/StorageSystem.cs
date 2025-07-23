@@ -55,7 +55,7 @@ namespace MonsterSave.Runtime
             if (serialized == null || serialized.Length == 0)
                 return default;
 
-            return _serializer.Deserialize<T>(serialized);
+            return (T)_serializer.Deserialize(typeof(T), serialized);
         }
 
         public bool Sync()

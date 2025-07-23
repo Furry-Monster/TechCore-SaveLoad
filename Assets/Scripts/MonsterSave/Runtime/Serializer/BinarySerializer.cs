@@ -14,7 +14,8 @@ namespace MonsterSave.Runtime
             if (!obj.GetType().IsSerializable)
                 throw new InvalidCastException($"{obj.GetType().FullName} is not [Serializable].");
 
-            return Serialize(obj);
+            var adapted = TypeRegistry.AdaptToSerializable(obj);
+            return Serialize(adapted);
         }
 
         object ISerializer.Deserialize(Type type, byte[] data)
@@ -26,21 +27,11 @@ namespace MonsterSave.Runtime
             if (data == null || data.Length == 0)
                 return null;
 
-            return Deserialize(type, data);
-        }
-
-        T ISerializer.Deserialize<T>(byte[] data)
-        {
-            if (!typeof(T).IsSerializable)
-                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
-            if (data == null || data.Length == 0)
-                return default;
-
-            return Deserialize<T>(data);
+            var serializable = Deserialize(type, data);
+            return TypeRegistry.AdaptFromSerializable(serializable);
         }
 
         protected abstract byte[] Serialize(object serializable);
         protected abstract object Deserialize(Type type, byte[] bytes);
-        protected abstract T Deserialize<T>(byte[] bytes);
     }
 }
