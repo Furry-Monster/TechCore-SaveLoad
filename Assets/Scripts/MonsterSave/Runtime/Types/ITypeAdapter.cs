@@ -7,7 +7,8 @@ namespace MonsterSave.Runtime
         Type ITypeAdapter.SourceType => typeof(TSource);
         Type ITypeAdapter.TargetType => typeof(TTarget);
 
-        object ITypeAdapter.ConvertToSerializable(object native) => ConvertToSerializable((TSource)native);
+        object ITypeAdapter.ConvertToSerializable(object native) =>
+            ConvertToSerializable((TSource)native);
 
         object ITypeAdapter.ConvertFromSerializable(object serializable) =>
             ConvertFromSerializable((TTarget)serializable);
