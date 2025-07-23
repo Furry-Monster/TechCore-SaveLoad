@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
-    public class StorageCore : IStorage
+    public class StorageSystem : IStorage
     {
         public readonly MonsterSaveConfig Config;
 
         private readonly IStorageMedia _media;
         private readonly ISerializer _serializer;
 
-        public StorageCore(MonsterSaveConfig config)
+        public StorageSystem(MonsterSaveConfig config)
         {
             Config = config;
 

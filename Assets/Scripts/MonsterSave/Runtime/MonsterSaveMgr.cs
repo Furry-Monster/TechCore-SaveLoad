@@ -5,7 +5,7 @@ namespace MonsterSave.Runtime
 {
     public class MonsterSaveMgr : Singleton<MonsterSaveMgr>
     {
-        private IStorage _storage;
+        private IStorage _storageSystem;
 
         public MonsterSaveConfig Config { get; set; }
 
@@ -21,8 +21,8 @@ namespace MonsterSave.Runtime
                     $"Can't load default configurations from path <Resources/{Config.name}>,please validate the integrity of the plugin.");
             }
 
-            _storage = new StorageCore(Config);
             TypeRegistry.Initialize();
+            _storageSystem = new StorageSystem(Config);
         }
 
         public void Save(string key, object data)

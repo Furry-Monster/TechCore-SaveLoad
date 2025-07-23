@@ -1,12 +1,50 @@
 using System;
+using System.Text;
 
 namespace MonsterSave.Runtime
 {
     public abstract class CharSerializer : ISerializer
     {
         public bool IsBinary => false;
-        public abstract string Serialize(object serializable);
-        public abstract object Deserialize(Type type, string content);
-        public abstract T Deserialize<T>(string content);
+
+        // interfaces impl
+        byte[] ISerializer.Serialize(object obj)
+        {
+            if (obj == null)
+                return null;
+            if (!obj.GetType().IsSerializable)
+                throw new InvalidCastException($"{obj.GetType().FullName} is not [Serializable].");
+
+            var result = Serialize(obj);
+            return Encoding.UTF8.GetBytes(result, 0, result.Length);
+        }
+
+        object ISerializer.Deserialize(Type type, byte[] data)
+        {
+            if (type == null)
+                return null;
+            if (!type.IsSerializable)
+                throw new InvalidCastException($"{type.FullName} is not [Serializable].");
+            if (data == null || data.Length == 0)
+                return null;
+
+            var content = Encoding.UTF8.GetString(data, 0, data.Length);
+            return Deserialize(type, content);
+        }
+
+        T ISerializer.Deserialize<T>(byte[] data)
+        {
+            if (!typeof(T).IsSerializable)
+                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
+            if (data == null || data.Length == 0)
+                return default;
+
+            var content = Encoding.UTF8.GetString(data, 0, data.Length);
+            return Deserialize<T>(content);
+        }
+
+        protected abstract string Serialize(object serializable);
+        protected abstract object Deserialize(Type type, string content);
+        protected abstract T Deserialize<T>(string content);
     }
 }
