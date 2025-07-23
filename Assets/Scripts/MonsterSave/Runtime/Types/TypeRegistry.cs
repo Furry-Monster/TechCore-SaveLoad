@@ -72,7 +72,59 @@ namespace MonsterSave.Runtime
 
         public static object AdaptToSerializable(object obj)
         {
-            throw new NotImplementedException();
+            if (obj == null)
+                return null;
+
+            // 尽量使用内置适配器直接序列化
+            var adapter = GetAdapter(obj.GetType());
+            if (adapter != null)
+                return adapter.ConvertToSerializable(obj);
+
+            // 如果找不到，那么检查是否obj可以被序列化
+            var type = obj.GetType();
+            if (!type.IsSerializable)
+            {
+                // 处理不可序列化的集合或字典
+                if (type.IsGenericEnumerable())
+                {
+                }
+
+                // 其他情况无法处理
+                return null;
+            }
+
+            // 内置值类型或字符串直接返回
+            if (type.IsPrimitive || type == typeof(string) || type.IsValueType)
+                return obj;
+
+            // 如果是类，递归处理
+            if (type.IsClass)
+            {
+                var result = new Dictionary<string, object>();
+
+                foreach (var property in type.GetProperties())
+                {
+                    if (!property.CanRead)
+                        continue;
+
+                    var value = property.GetValue(obj);
+                    result[property.Name] = AdaptToSerializable(value); // 递归处理属性
+                }
+
+                foreach (var field in type.GetFields())
+                {
+                    if (!field.IsPublic && !field.IsStatic)
+                        continue;
+
+                    var value = field.GetValue(obj);
+                    result[field.Name] = AdaptToSerializable(value); // 递归处理字段
+                }
+
+                return result;
+            }
+
+            // 其他情况无法处理
+            return null;
         }
 
         public static TTarget AdaptToSerializable<TSource, TTarget>(TSource source)
