@@ -30,7 +30,7 @@ namespace MonsterSave.Runtime
         }
     }
 
-    public class Vec3Adapter : ITypeAdapter<Vector3, MonsterVector3>
+    public class Vec3Adapter : IValueAdapter<Vector3, MonsterVector3>
     {
         public MonsterVector3 ConvertToSerializable(Vector3 native) => new(native);
 

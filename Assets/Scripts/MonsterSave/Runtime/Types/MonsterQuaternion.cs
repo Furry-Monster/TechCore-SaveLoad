@@ -33,7 +33,7 @@ namespace MonsterSave.Runtime
         }
     }
 
-    public class QuaternionAdapter : ITypeAdapter<Quaternion, MonsterQuaternion>
+    public class QuaternionAdapter : IValueAdapter<Quaternion, MonsterQuaternion>
     {
         public MonsterQuaternion ConvertToSerializable(Quaternion native) =>
             new(native.x, native.y, native.z, native.w);

@@ -33,7 +33,7 @@ namespace MonsterSave.Runtime
         }
     }
 
-    public class ColorAdapter : ITypeAdapter<Color, MonsterColor>
+    public class ColorAdapter : IValueAdapter<Color, MonsterColor>
     {
         public MonsterColor ConvertToSerializable(Color native) => new(native);
 

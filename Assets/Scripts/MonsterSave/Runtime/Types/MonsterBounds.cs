@@ -34,7 +34,7 @@ namespace MonsterSave.Runtime
         }
     }
 
-    public class BoundsAdapter : ITypeAdapter<Bounds, MonsterBounds>
+    public class BoundsAdapter : IValueAdapter<Bounds, MonsterBounds>
     {
         public MonsterBounds ConvertToSerializable(Bounds native) => new(native.center, native.size);
 

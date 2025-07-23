@@ -75,7 +75,7 @@ namespace MonsterSave.Runtime
         }
     }
 
-    public class Matrix4x4Adapter : ITypeAdapter<Matrix4x4, MonsterMatrix4x4>
+    public class Matrix4x4Adapter : IValueAdapter<Matrix4x4, MonsterMatrix4x4>
     {
         public MonsterMatrix4x4 ConvertToSerializable(Matrix4x4 native)
         {

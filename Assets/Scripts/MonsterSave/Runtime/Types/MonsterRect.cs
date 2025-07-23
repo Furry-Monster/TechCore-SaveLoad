@@ -33,7 +33,7 @@ namespace MonsterSave.Runtime
         }
     }
 
-    public class RectAdapter : ITypeAdapter<Rect, MonsterRect>
+    public class RectAdapter : IValueAdapter<Rect, MonsterRect>
     {
         public MonsterRect ConvertToSerializable(Rect native) => new(native);
 

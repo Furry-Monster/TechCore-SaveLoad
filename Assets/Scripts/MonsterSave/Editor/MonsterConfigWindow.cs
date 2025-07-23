@@ -43,19 +43,19 @@ namespace MonsterSave.Editor
             switch (_currentState)
             {
                 case State.Modifying:
-                {
-                    // 检查是否选择了配置
-                    if (!_selectedConfig)
                     {
-                        // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-                        Debug.LogWarning("没有选择配置文件.");
-                        _currentState = State.None;
-                    }
+                        // 检查是否选择了配置
+                        if (!_selectedConfig)
+                        {
+                            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                            Debug.LogWarning("没有选择配置文件.");
+                            _currentState = State.None;
+                        }
 
-                    // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-                    ShowModifyView();
-                    break;
-                }
+                        // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                        ShowModifyView();
+                        break;
+                    }
                 case State.Creating:
                     ShowCreatingView();
                     break;
