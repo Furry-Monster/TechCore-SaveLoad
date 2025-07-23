@@ -19,7 +19,7 @@ namespace MonsterSave.Runtime
             }
         }
 
-        public MonsterArrayList<Entry> entries = new();
+        public MonsterList<Entry> entries = new();
 
         public MonsterDict()
         {

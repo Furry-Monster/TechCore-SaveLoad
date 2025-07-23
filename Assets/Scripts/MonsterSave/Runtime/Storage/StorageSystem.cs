@@ -36,6 +36,8 @@ namespace MonsterSave.Runtime
 
         public void Save(object data)
         {
+            var serialized = _serializer.Serialize(data);
+            _media.WriteAllBytes(serialized);
         }
 
         public object Load()
@@ -45,7 +47,15 @@ namespace MonsterSave.Runtime
 
         public T Load<T>()
         {
-            throw new NotImplementedException();
+            if (!_media.Exists())
+                return default;
+
+            var serialized = _media.ReadAllBytes();
+
+            if (serialized == null || serialized.Length == 0)
+                return default;
+
+            return _serializer.Deserialize<T>(serialized);
         }
 
         public bool Sync()

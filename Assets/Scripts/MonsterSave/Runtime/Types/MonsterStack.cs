@@ -6,7 +6,7 @@ namespace MonsterSave.Runtime
     [Serializable]
     public class MonsterStack<T>
     {
-        public MonsterArrayList<T> items = new();
+        public MonsterList<T> items = new();
 
         public MonsterStack()
         {

@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 
@@ -20,8 +19,43 @@ namespace MonsterSave.Runtime
             Register(new Matrix4x4Adapter());
         }
 
-        public static void Register<TSource, TTarget>([NotNull] ITypeAdapter<TSource, TTarget> adapter)
+        public static void Register<TSource, TTarget>(ITypeAdapter<TSource, TTarget> adapter)
         {
+            if (!typeof(TTarget).IsSerializable)
+                throw new NotSupportedException($"TTarget<{typeof(TTarget).FullName}> must be serializable");
+
+            // 对泛型集合，递归检查泛型参数是否可以序列化
+            if (typeof(TTarget).IsGenericEnumerable())
+            {
+                var uncheck = new Queue<Type>();
+                uncheck.Enqueue(typeof(TTarget));
+                while (uncheck.Count > 0)
+                {
+                    var currentType = uncheck.Dequeue();
+                    if (!currentType.IsGenericEnumerable())
+                        continue;
+
+                    var args = currentType.GetGenericArguments();
+                    var invalid = new List<Type>();
+                    foreach (var arg in args)
+                    {
+                        if (arg.IsGenericEnumerable())
+                            uncheck.Enqueue(arg);
+
+                        else if (!arg.IsSerializable)
+                            invalid.Add(arg);
+                    }
+
+                    if (invalid.Count > 0)
+                        throw new NotSupportedException(
+                            $"Generic Type <{currentType.FullName}> has non-serializable arguments :{invalid}");
+                }
+            }
+
+            if (typeof(TSource).IsClass)
+            {
+            }
+
             if (Adapters.ContainsKey(typeof(TSource)))
                 Adapters[typeof(TSource)] = adapter;
             else
@@ -33,6 +67,26 @@ namespace MonsterSave.Runtime
             return Adapters.TryGetValue(typeof(TSource), out var adapter)
                 ? (ITypeAdapter<TSource, TTarget>)adapter
                 : null;
+        }
+
+        public static bool HasAdapter<TSource>() => Adapters.ContainsKey(typeof(TSource));
+
+        public static TTarget AdaptToSerializable<TSource, TTarget>(TSource source)
+        {
+            var adapter = GetAdapter<TSource, TTarget>();
+            if (adapter == null || source == null)
+                return default(TTarget);
+
+            return adapter.ConvertToSerializable(source);
+        }
+
+        public static TSource AdaptFromSerializable<TSource, TTarget>(TTarget target)
+        {
+            var adapter = GetAdapter<TSource, TTarget>();
+            if (adapter == null || target == null)
+                return default(TSource);
+
+            return adapter.ConvertFromSerializable(target);
         }
     }
 }

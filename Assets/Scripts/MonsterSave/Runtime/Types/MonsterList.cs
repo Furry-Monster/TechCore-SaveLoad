@@ -9,18 +9,18 @@ namespace MonsterSave.Runtime
     /// 所以这段代码暂时留在这里
     /// </summary>
     [Serializable]
-    public class MonsterArrayList<T>
+    public class MonsterList<T>
     {
         public T[] items;
         public int count;
 
-        public MonsterArrayList()
+        public MonsterList()
         {
             items = Array.Empty<T>();
             count = 0;
         }
 
-        public MonsterArrayList(IEnumerable<T> collection)
+        public MonsterList(IEnumerable<T> collection)
         {
             items = collection.ToArray();
             count = items.Length;
@@ -41,12 +41,12 @@ namespace MonsterSave.Runtime
         public T this[int index] => items[index];
     }
 
-    public class ArrayListAdapter<T> :
-        ITypeAdapter<List<T>, MonsterArrayList<T>>
+    public class ListAdapter<T> :
+        ITypeAdapter<List<T>, MonsterList<T>>
     {
-        public MonsterArrayList<T> ConvertToSerializable(List<T> native) => new(native);
+        public MonsterList<T> ConvertToSerializable(List<T> native) => new(native);
 
-        public List<T> ConvertFromSerializable(MonsterArrayList<T> serializable) =>
+        public List<T> ConvertFromSerializable(MonsterList<T> serializable) =>
             new(serializable.items.Take(serializable.count));
     }
 }
