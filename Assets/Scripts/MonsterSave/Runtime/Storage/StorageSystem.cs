@@ -1,14 +1,15 @@
 using System;
+using System.Collections.Generic;
 
 namespace MonsterSave.Runtime
 {
     public class StorageSystem : IStorage
     {
         private MonsterSaveConfig _config;
-        private IStorageMedia _media;
-        private ICache _cache;
         private ISerializer _serializer;
+        private IStorageMedia _media;
 
+        private Dictionary<string, object> _mediaCache = new();
 
         public StorageSystem()
         {
@@ -18,7 +19,6 @@ namespace MonsterSave.Runtime
 
                 var mediaEnum = _config.media;
                 var formatEnum = _config.format;
-                var cacheEnum = _config.cache;
 
                 _media = mediaEnum switch
                 {
@@ -35,34 +35,65 @@ namespace MonsterSave.Runtime
                     Format.Binary => new DefaultBinarySerializer(),
                     _ => throw new ArgumentOutOfRangeException()
                 };
-
-                _cache = cacheEnum switch
-                {
-                    Cache.None => new FullCache(),
-                    Cache.LRU => new LRUCache(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
             };
         }
 
         public void Save(string key, object data)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(key) || data == null)
+                return;
+
+            _mediaCache.Add(key, data);
         }
 
         public object Load(string key)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(key))
+                return null;
+
+            return _mediaCache.GetValueOrDefault(key);
         }
 
         public T Load<T>(string key)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(key))
+                return default;
+
+            return (T)_mediaCache.GetValueOrDefault(key);
         }
 
-        public bool Sync()
+        public bool Sync(bool toDisk = true)
         {
-            throw new NotImplementedException();
+            if (toDisk)
+            {
+                if (_media is IFullStoreMedia fullStore)
+                {
+                    var serialized = _serializer.Serialize(_mediaCache);
+                    fullStore.WriteAllBytes(serialized);
+                    return true;
+                }
+                else if (_media is IKVStoreMedia kvStore)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (_media is IFullStoreMedia fullStore)
+                {
+                    var serialized = fullStore.ReadAllBytes();
+                    _mediaCache =
+                        (Dictionary<string, object>)_serializer.Deserialize(typeof(Dictionary<string, object>),
+                            serialized);
+                    return true;
+                }
+                else if (_media is IKVStoreMedia kvStore)
+                {
+                    return false;
+                }
+            }
+
+            return false;
         }
     }
 }

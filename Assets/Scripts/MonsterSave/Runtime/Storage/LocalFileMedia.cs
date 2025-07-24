@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
@@ -10,7 +11,10 @@ namespace MonsterSave.Runtime
         public LocalFileMedia()
         {
             MonsterSaveMgr.Instance.OnConfigUpdated += () =>
-                _path = MonsterSaveMgr.Instance.Config.storagePath;
+            {
+                _path = MonsterSaveMgr.Instance.Config.storagePath
+                        ?? Application.persistentDataPath + "save.ms";
+            };
         }
 
         public void WriteAllText(string content)

@@ -5,6 +5,6 @@ namespace MonsterSave.Runtime
         void Save(string key, object data);
         object Load(string key);
         T Load<T>(string key);
-        bool Sync();
+        bool Sync(bool toDisk = true);
     }
 }
