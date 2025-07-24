@@ -5,43 +5,39 @@ namespace MonsterSave.Runtime
 {
     public class MonsterSaveMgr : Singleton<MonsterSaveMgr>
     {
-        private IStorage _storageSystem;
-        private readonly MonsterSaveConfig _config;
+        private readonly IStorage _storageSystem;
+
+        private MonsterSaveConfig _config;
+
+        public MonsterSaveConfig Config
+        {
+            get => _config;
+            set
+            {
+                _config = value;
+                OnConfigUpdated?.Invoke();
+            }
+        }
+
+        public Action OnConfigUpdated { get; set; }
 
         public MonsterSaveMgr()
         {
-            // load default configurations
-            _config = Resources.Load<MonsterSaveConfig>("DefaultConfig");
-            if (_config == null)
-            {
-                _config = ScriptableObject.CreateInstance<MonsterSaveConfig>();
-                _config.name = "DefaultConfig";
-                Debug.LogWarning(
-                    $"Can't load default configurations from path <Resources/{_config.name}>,please validate the integrity of the plugin.");
-            }
-
             TypeRegistry.Initialize();
-            _storageSystem = new StorageSystem(_config);
+            _storageSystem = new StorageSystem();
+
+            // 加载默认配置
+            Config = Resources.Load<MonsterSaveConfig>("DefaultConfig");
+            if (Config == null)
+                throw new Exception("Default config not found");
         }
 
-        public void Save(string key, object data)
-        {
-            throw new NotImplementedException();
-        }
+        public void Save(string key, object data) => _storageSystem.Save(key, data);
 
-        public object Load(string key)
-        {
-            throw new NotImplementedException();
-        }
+        public object Load(string key) => _storageSystem.Load(key);
 
-        public T Load<T>(string key)
-        {
-            throw new NotImplementedException();
-        }
+        public T Load<T>(string key) => _storageSystem.Load<T>(key);
 
-        public void Sync()
-        {
-            throw new NotImplementedException();
-        }
+        public bool Sync() => _storageSystem.Sync();
     }
 }
