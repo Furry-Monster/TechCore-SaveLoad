@@ -18,6 +18,7 @@ namespace MonsterSave.Runtime
 
                 var mediaEnum = _config.media;
                 var formatEnum = _config.format;
+                var cacheEnum = _config.cache;
 
                 _media = mediaEnum switch
                 {
@@ -32,6 +33,13 @@ namespace MonsterSave.Runtime
                     Format.JSON => new DefaultJSONSerializer(),
                     Format.XML => new DefaultXMLSerializer(),
                     Format.Binary => new DefaultBinarySerializer(),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                _cache = cacheEnum switch
+                {
+                    Cache.None => new NoCache(),
+                    Cache.LRU => new LRUCache(),
                     _ => throw new ArgumentOutOfRangeException()
                 };
             };
