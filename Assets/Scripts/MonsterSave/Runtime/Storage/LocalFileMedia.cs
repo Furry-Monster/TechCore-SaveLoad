@@ -10,9 +10,9 @@ namespace MonsterSave.Runtime
 
         public LocalFileMedia()
         {
-            MonsterSaveMgr.Instance.OnConfigUpdated += () =>
+            MonsterSaveMgr.OnConfigUpdated += () =>
             {
-                _path = MonsterSaveMgr.Instance.Config.storagePath
+                _path = MonsterSaveMgr.Config.storagePath
                         ?? Application.persistentDataPath + "save.ms";
             };
         }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
@@ -13,9 +15,9 @@ namespace MonsterSave.Runtime
 
         public StorageSystem()
         {
-            MonsterSaveMgr.Instance.OnConfigUpdated += () =>
+            MonsterSaveMgr.OnConfigUpdated += () =>
             {
-                _config = MonsterSaveMgr.Instance.Config;
+                _config = MonsterSaveMgr.Config;
 
                 var mediaEnum = _config.media;
                 var formatEnum = _config.format;
@@ -66,6 +68,24 @@ namespace MonsterSave.Runtime
         {
             if (toDisk)
             {
+                if (_media == null)
+                {
+                    if (_config.media == Media.MemoryOnly)
+                        return true;
+
+                    if (_config.media == Media.PlayerPrefs)
+                    {
+                        foreach (var entry in _mediaCache)
+                        {
+                            var serialized = _serializer.Serialize(entry.Value);
+                            PlayerPrefs.SetString(entry.Key,
+                                Encoding.UTF8.GetString(serialized, 0, serialized.Length));
+                        }
+
+                        PlayerPrefs.Save();
+                    }
+                }
+
                 if (_media is IFullStoreMedia fullStore)
                 {
                     var serialized = _serializer.Serialize(_mediaCache);
@@ -79,6 +99,12 @@ namespace MonsterSave.Runtime
             }
             else
             {
+                if (_media == null)
+                {
+                    if (_config.media == Media.MemoryOnly)
+                        return false;
+                }
+
                 if (_media is IFullStoreMedia fullStore)
                 {
                     var serialized = fullStore.ReadAllBytes();

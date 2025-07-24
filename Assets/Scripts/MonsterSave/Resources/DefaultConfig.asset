@@ -15,6 +15,8 @@ MonoBehaviour:
   format: 0
   media: 2
   encryption: 0
+  cache: 0
   storagePath: 
+  apiKey: 
   scheduledSync: 0
-  typeCache: 0
+  cacheSize: 512

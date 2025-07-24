@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
-    public class MonsterSaveMgr : Singleton<MonsterSaveMgr>
+    public static class MonsterSaveMgr
     {
-        private readonly IStorage _storageSystem;
+        private static readonly IStorage StorageSystem;
 
-        private MonsterSaveConfig _config;
+        private static MonsterSaveConfig _config;
 
-        public MonsterSaveConfig Config
+        public static MonsterSaveConfig Config
         {
             get => _config;
             set
@@ -19,12 +19,12 @@ namespace MonsterSave.Runtime
             }
         }
 
-        public Action OnConfigUpdated { get; set; }
+        public static Action OnConfigUpdated { get; set; }
 
-        public MonsterSaveMgr()
+        static MonsterSaveMgr()
         {
             TypeRegistry.Initialize();
-            _storageSystem = new StorageSystem();
+            StorageSystem = new StorageSystem();
 
             // 加载默认配置
             Config = Resources.Load<MonsterSaveConfig>("DefaultConfig");
@@ -32,12 +32,12 @@ namespace MonsterSave.Runtime
                 throw new Exception("Default config not found");
         }
 
-        public void Save(string key, object data) => _storageSystem.Save(key, data);
+        public static void Save(string key, object data) => StorageSystem.Save(key, data);
 
-        public object Load(string key) => _storageSystem.Load(key);
+        public static object Load(string key) => StorageSystem.Load(key);
 
-        public T Load<T>(string key) => _storageSystem.Load<T>(key);
+        public static T Load<T>(string key) => StorageSystem.Load<T>(key);
 
-        public bool Sync() => _storageSystem.Sync();
+        public static bool Sync() => StorageSystem.Sync();
     }
 }
