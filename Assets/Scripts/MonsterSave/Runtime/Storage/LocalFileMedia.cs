@@ -5,11 +5,12 @@ namespace MonsterSave.Runtime
 {
     public class LocalFileMedia : IStorageMedia
     {
-        private readonly string _path;
+        private string _path;
 
-        public LocalFileMedia(StorageSystem storageSystem)
+        public LocalFileMedia()
         {
-            _path = storageSystem.Config.storagePath;
+            MonsterSaveMgr.Instance.OnConfigUpdated += () =>
+                _path = MonsterSaveMgr.Instance.Config.storagePath;
         }
 
         public void WriteAllText(string content)

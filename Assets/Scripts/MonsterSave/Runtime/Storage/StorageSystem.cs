@@ -1,80 +1,60 @@
 using System;
-using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
     public class StorageSystem : IStorage
     {
-        public readonly MonsterSaveConfig Config;
+        private MonsterSaveConfig _config;
+        private IStorageMedia _media;
+        private ICache _cache;
+        private ISerializer _serializer;
 
-        private readonly IStorageMedia _media;
-        private readonly ISerializer _serializer;
 
-        public StorageSystem(MonsterSaveConfig config)
+        public StorageSystem()
         {
-            Config = config;
-
-            var mediaEnum = Config.media;
-            var formatEnum = Config.format;
-
-            _media = mediaEnum switch
+            MonsterSaveMgr.Instance.OnConfigUpdated += () =>
             {
-                Media.LocalFile => new LocalFileMedia(this),
-                Media.PlayerPrefs => null,
-                Media.MemoryOnly => null,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                _config = MonsterSaveMgr.Instance.Config;
 
-            _serializer = formatEnum switch
-            {
-                Format.JSON => new DefaultJSONSerializer(),
-                Format.XML => new DefaultXMLSerializer(),
-                Format.Binary => new DefaultBinarySerializer(),
-                _ => throw new ArgumentOutOfRangeException()
+                var mediaEnum = _config.media;
+                var formatEnum = _config.format;
+
+                _media = mediaEnum switch
+                {
+                    Media.LocalFile => new LocalFileMedia(),
+                    Media.PlayerPrefs => null,
+                    Media.MemoryOnly => null,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                _serializer = formatEnum switch
+                {
+                    Format.JSON => new DefaultJSONSerializer(),
+                    Format.XML => new DefaultXMLSerializer(),
+                    Format.Binary => new DefaultBinarySerializer(),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
             };
         }
 
-        public void Save(object data)
-        {
-            var serialized = _serializer.Serialize(data);
-            _media.WriteAllBytes(serialized);
-        }
-
-        public object Load()
+        public void Save(string key, object data)
         {
             throw new NotImplementedException();
         }
 
-        public T Load<T>()
+        public object Load(string key)
         {
-            if (!_media.Exists())
-                return default;
+            throw new NotImplementedException();
+        }
 
-            var serialized = _media.ReadAllBytes();
-
-            if (serialized == null || serialized.Length == 0)
-                return default;
-
-            return (T)_serializer.Deserialize(typeof(T), serialized);
+        public T Load<T>(string key)
+        {
+            throw new NotImplementedException();
         }
 
         public bool Sync()
         {
-            // 仅内存存储时不进行持久化
-            if (Config.media == Media.MemoryOnly)
-                return true;
-
-            // 兼容PlayerPrefs
-            if (Config.media == Media.PlayerPrefs)
-            {
-                PlayerPrefs.Save();
-                return true;
-            }
-
-            // 其他存储
-
-
-            return true;
+            throw new NotImplementedException();
         }
     }
 }
