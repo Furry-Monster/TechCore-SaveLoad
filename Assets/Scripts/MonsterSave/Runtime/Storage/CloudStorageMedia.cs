@@ -2,7 +2,7 @@ using System;
 
 namespace MonsterSave.Runtime
 {
-    public class CloudStorageMedia : IStorageMedia
+    public class CloudStorageMedia : IFullStoreMedia
     {
         public void WriteAllText(string content)
         {

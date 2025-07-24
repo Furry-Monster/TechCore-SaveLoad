@@ -2,34 +2,34 @@ using System;
 
 namespace MonsterSave.Runtime
 {
-    public class SQLiteMedia : IStorageMedia
+    public class SQLiteMedia : IKVStoreMedia
     {
-        public void WriteAllText(string content)
+        public string GetText(string key)
         {
             throw new NotImplementedException();
         }
 
-        public string ReadAllText()
+        public void SetText(string key, string text)
         {
             throw new NotImplementedException();
         }
 
-        public void WriteAllBytes(byte[] bytes)
+        public byte[] GetBytes(string key)
         {
             throw new NotImplementedException();
         }
 
-        public byte[] ReadAllBytes()
+        public void SetBytes(string key, byte[] bytes)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete()
+        public void Delete(string key)
         {
             throw new NotImplementedException();
         }
 
-        public bool Exists()
+        public bool Exists(string key)
         {
             throw new NotImplementedException();
         }

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace MonsterSave.Runtime
 {
-    public class LocalFileMedia : IStorageMedia
+    public class LocalFileMedia : IFullStoreMedia
     {
         private string _path;
 

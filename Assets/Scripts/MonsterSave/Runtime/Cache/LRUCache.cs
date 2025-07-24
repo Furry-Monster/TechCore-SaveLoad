@@ -1,9 +1,20 @@
 using System;
+using System.Collections.Generic;
 
 namespace MonsterSave.Runtime
 {
     public class LRUCache : ICache
     {
+        private Dictionary<string, object> _cache = new();
+        private HashSet<string> _dirtyKeys = new();
+        private List<string> _lruList = new();
+
+        public LRUCache()
+        {
+            MonsterSaveMgr.Instance.OnConfigUpdated += ()
+                => Capacity = MonsterSaveMgr.Instance.Config.cacheSize;
+        }
+
         public object Get(string key)
         {
             throw new NotImplementedException();

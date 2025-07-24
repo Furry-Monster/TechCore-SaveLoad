@@ -38,7 +38,7 @@ namespace MonsterSave.Runtime
 
                 _cache = cacheEnum switch
                 {
-                    Cache.None => new NoCache(),
+                    Cache.None => new FullCache(),
                     Cache.LRU => new LRUCache(),
                     _ => throw new ArgumentOutOfRangeException()
                 };

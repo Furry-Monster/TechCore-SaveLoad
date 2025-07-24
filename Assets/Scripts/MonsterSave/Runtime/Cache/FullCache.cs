@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 namespace MonsterSave.Runtime
 {
-    public class NoCache : ICache
+    public class FullCache : ICache
     {
+        private Dictionary<string, object> _cache = new();
+
         public object Get(string key)
         {
             throw new NotImplementedException();
