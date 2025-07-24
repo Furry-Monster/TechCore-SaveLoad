@@ -7,7 +7,6 @@ namespace MonsterSave.Runtime
     {
         public bool IsBinary => true;
 
-        // interfaces impl
         byte[] ISerializer.Serialize(object obj)
         {
             if (obj == null)
@@ -15,21 +14,22 @@ namespace MonsterSave.Runtime
             if (!obj.GetType().IsSerializable)
                 throw new InvalidCastException($"{obj.GetType().FullName} is not [Serializable].");
 
-            return Serialize(obj);
+            var content = RecursiveSerialize(obj);
+            return content;
         }
 
         private byte[] RecursiveSerialize(object obj)
         {
             if (obj == null)
-                return null;
+                return Array.Empty<byte>();
 
             var type = obj.GetType();
 
-            // 1. ◊÷∑˚¥ÆªÚ÷µ¿‡–Õ£¨÷±Ω”–Ú¡–ªØ
+            // 1. Â≠óÁ¨¶‰∏≤ÊàñÂÄºÁ±ªÂûãÔºåÁõ¥Êé•Â∫èÂàóÂåñ
             if (obj is string || type.IsValueType)
-                return Serialize(obj);
+                return SerializeHandler(obj);
 
-            // 2. ∑«ø…–Ú¡–ªØ∂‘œÛ£¨≥¢ ‘”√TypeRegistry  ≈‰
+            // 2. ÈùûÂèØÂ∫èÂàóÂåñÂØπË±°ÔºåÂ∞ùËØïÁî®TypeRegistryÈÄÇÈÖç
             if (!type.IsSerializable)
             {
                 if (TypeRegistry.HasAdapter(type))
@@ -39,60 +39,63 @@ namespace MonsterSave.Runtime
                         .ConvertToSerializable(obj);
                     return RecursiveSerialize(adapted);
                 }
-            }
 
-            // 3. ∑∫–ÕºØ∫œ£¨µ›πÈ–Ú¡–ªØ√ø∏ˆ‘™Àÿ
-            if (type.IsGenericEnumerable())
-            {
-                var args = type.GetGenericArguments();
-                var invalid = new List<Type>();
-                foreach (var arg in args)
+                if (type.IsGenericEnumerable())
                 {
-                    if (arg.IsGenericEnumerable())
-                        throw new NotSupportedException($"Generic Type <{type.FullName}> has non-serializable arguments :{arg.FullName}");
-                    if (!arg.IsSerializable)
-                        invalid.Add(arg);
-                }
-                if (invalid.Count > 0)
-                    throw new NotSupportedException($"Generic Type <{type.FullName}> has non-serializable arguments :{string.Join(", ", invalid)}");
-
-                var adapted = TypeRegistry
-                    .GetAdapter(type)
-                    .ConvertToSerializable(obj);
-                return Serialize(adapted);
-            }
-
-            // 4. ø…–Ú¡–ªØ¿‡£¨µ›πÈ–Ú¡–ªØ Ù–‘∫Õ◊÷∂Œ
-            if (type.IsSerializable && type.IsClass)
-            {
-                var properties = type.GetProperties();
-                var fields = type.GetFields();
-                var dict = new Dictionary<string, byte[]>();
-
-                foreach (var property in properties)
-                {
-                    if (property.CanRead && property.CanWrite)
+                    var args = type.GetGenericArguments();
+                    var invalid = new List<Type>();
+                    foreach (var arg in args)
                     {
-                        var value = property.GetValue(obj);
-                        var serializedValue = RecursiveSerialize(value);
-                        dict[property.Name] = serializedValue;
+                        if (arg.IsGenericEnumerable())
+                            throw new NotSupportedException(
+                                $"Generic Type <{type.FullName}> has non-serializable arguments :{arg.FullName}");
+                        if (!arg.IsSerializable)
+                            invalid.Add(arg);
                     }
-                }
 
-                foreach (var field in fields)
-                {
-                    if (field.IsPublic && !field.IsStatic)
-                    {
-                        var value = field.GetValue(obj);
-                        var serializedValue = RecursiveSerialize(value);
-                        dict[field.Name] = serializedValue;
-                    }
-                }
+                    if (invalid.Count > 0)
+                        throw new NotSupportedException(
+                            $"Generic Type <{type.FullName}> has non-serializable arguments :{string.Join(", ", invalid)}");
 
-                return Serialize(dict);
+                    // TODO:Âêå
+                    throw new NotImplementedException();
+                }
             }
 
-            throw new NotSupportedException($"Type {type.FullName} is not supported for binary serialization.");
+            // 3. ÂèØÂ∫èÂàóÂåñÁ±ªÔºåÈÄíÂΩíÂ∫èÂàóÂåñÂ±ûÊÄßÂíåÂ≠óÊÆµ
+            if (type.IsSerializable)
+            {
+                if (type.IsClass)
+                {
+                    var properties = type.GetProperties();
+                    var fields = type.GetFields();
+                    var dict = new Dictionary<string, byte[]>();
+
+                    foreach (var property in properties)
+                    {
+                        if (property.CanRead && property.CanWrite)
+                        {
+                            var value = property.GetValue(obj);
+                            var serializedValue = RecursiveSerialize(value);
+                            dict[property.Name] = serializedValue;
+                        }
+                    }
+
+                    foreach (var field in fields)
+                    {
+                        if (field.IsPublic && !field.IsStatic)
+                        {
+                            var value = field.GetValue(obj);
+                            var serializedValue = RecursiveSerialize(value);
+                            dict[field.Name] = serializedValue;
+                        }
+                    }
+
+                    return RecursiveSerialize(dict);
+                }
+            }
+
+            return Array.Empty<byte>();
         }
 
         object ISerializer.Deserialize(Type type, byte[] data)
@@ -104,10 +107,95 @@ namespace MonsterSave.Runtime
             if (data == null || data.Length == 0)
                 return null;
 
-            return Deserialize(type, data);
+            return RecursiveDeserialize(type, data);
         }
 
-        protected abstract byte[] Serialize(object serializable);
-        protected abstract object Deserialize(Type type, byte[] bytes);
+        private object RecursiveDeserialize(Type type, byte[] data)
+        {
+            if (data == null || data.Length == 0 || type == null)
+                return null;
+
+            if (type == typeof(string) || type.IsValueType)
+                return DeserializeHandler(type, data);
+
+            if (!type.IsSerializable)
+            {
+                if (TypeRegistry.HasAdapter(type))
+                {
+                    var adaptedType = TypeRegistry.GetAdapter(type).TargetType;
+                    var adaptedValue = RecursiveDeserialize(adaptedType, data);
+                    return TypeRegistry
+                        .GetAdapter(type)
+                        .ConvertFromSerializable(adaptedValue);
+                }
+
+                if (type.IsGenericEnumerable())
+                {
+                    var args = type.GetGenericArguments();
+                    var invalid = new List<Type>();
+                    foreach (var arg in args)
+                    {
+                        if (arg.IsGenericEnumerable())
+                            throw new NotSupportedException(
+                                $"Generic Type <{type.FullName}> has non-serializable arguments :{arg.FullName}");
+                        if (!arg.IsSerializable)
+                            invalid.Add(arg);
+                    }
+
+                    if (invalid.Count > 0)
+                        throw new NotSupportedException(
+                            $"Generic Type <{type.FullName}> has non-serializable arguments :{invalid}");
+
+                    // TODO:Â¶ÇÊûúÊâÄÊúâÂèÇÊï∞ÈÉΩÂèØÂ∫èÂàóÂåñÔºåÁî®ÈªòËÆ§ÊñπÂºèÂ§ÑÁêÜÊï∞ÊçÆÁªìÊûÑ
+                    throw new NotImplementedException();
+                }
+            }
+
+            if (type.IsSerializable)
+            {
+                if (type.IsClass)
+                {
+                    var adaptedValue =
+                        (Dictionary<string, byte[]>)RecursiveDeserialize(typeof(Dictionary<string, byte[]>), data);
+                    if (adaptedValue == null)
+                        return null;
+
+                    var instance = Activator.CreateInstance(type);
+                    var properties = type.GetProperties();
+                    var fields = type.GetFields();
+
+                    foreach (var property in properties)
+                    {
+                        if (property.CanRead && property.CanWrite)
+                        {
+                            if (adaptedValue.TryGetValue(property.Name, out var serializedValue))
+                            {
+                                var value = RecursiveDeserialize(property.GetType(), serializedValue);
+                                property.SetValue(instance, value);
+                            }
+                        }
+                    }
+
+                    foreach (var field in fields)
+                    {
+                        if (field.IsPublic || field.IsStatic)
+                        {
+                            if (adaptedValue.TryGetValue(field.Name, out var serializedValue))
+                            {
+                                var value = RecursiveDeserialize(field.GetType(), serializedValue);
+                                field.SetValue(instance, value);
+                            }
+                        }
+                    }
+
+                    return instance;
+                }
+            }
+
+            return null;
+        }
+
+        protected abstract byte[] SerializeHandler(object serializable);
+        protected abstract object DeserializeHandler(Type type, byte[] bytes);
     }
 }

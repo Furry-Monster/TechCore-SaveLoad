@@ -6,7 +6,7 @@ namespace MonsterSave.Runtime
 {
     public class DefaultBinarySerializer : BinarySerializer
     {
-        protected override byte[] Serialize(object serializable)
+        protected override byte[] SerializeHandler(object serializable)
         {
             if (serializable == null || !serializable.GetType().IsSerializable)
                 return null;
@@ -18,7 +18,7 @@ namespace MonsterSave.Runtime
             return memoryStream.ToArray();
         }
 
-        protected override object Deserialize(Type type, byte[] bytes)
+        protected override object DeserializeHandler(Type type, byte[] bytes)
         {
             if (bytes == null || bytes.Length == 0)
                 return null;

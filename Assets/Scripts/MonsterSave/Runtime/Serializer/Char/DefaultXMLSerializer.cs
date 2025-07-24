@@ -10,7 +10,7 @@ namespace MonsterSave.Runtime
     /// </summary>
     public class DefaultXMLSerializer : CharSerializer
     {
-        protected override string Serialize(object serializable)
+        protected override string SerializeHandler(object serializable)
         {
             if (serializable == null || !serializable.GetType().IsSerializable)
                 return null;
@@ -27,7 +27,7 @@ namespace MonsterSave.Runtime
             return stringWriter.ToString();
         }
 
-        protected override object Deserialize(Type type, string xml)
+        protected override object DeserializeHandler(Type type, string xml)
         {
             if (string.IsNullOrEmpty(xml))
                 return null;

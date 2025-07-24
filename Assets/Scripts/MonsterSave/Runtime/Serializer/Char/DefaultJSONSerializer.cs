@@ -8,7 +8,7 @@ namespace MonsterSave.Runtime
     /// </summary>
     public class DefaultJSONSerializer : CharSerializer
     {
-        protected override string Serialize(object serializable)
+        protected override string SerializeHandler(object serializable)
         {
             if (serializable == null || !serializable.GetType().IsSerializable)
                 return null;
@@ -16,7 +16,7 @@ namespace MonsterSave.Runtime
             return JsonUtility.ToJson(serializable);
         }
 
-        protected override object Deserialize(Type type, string json)
+        protected override object DeserializeHandler(Type type, string json)
         {
             if (string.IsNullOrEmpty(json))
                 return null;

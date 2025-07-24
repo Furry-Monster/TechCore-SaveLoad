@@ -73,6 +73,4 @@ namespace MonsterSave.Runtime
             return nativeList;
         }
     }
-
-
 }
