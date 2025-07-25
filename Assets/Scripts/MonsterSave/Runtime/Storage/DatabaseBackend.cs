@@ -1,35 +1,36 @@
 using System;
+using System.Collections.Generic;
 
 namespace MonsterSave.Runtime
 {
-    public class CloudStorageMedia : IFullStoreMedia
+    public class DatabaseBackend : IStorageBackend
     {
-        public void WriteAllText(string content)
+        public void Write(string key, byte[] data)
         {
             throw new NotImplementedException();
         }
 
-        public string ReadAllText()
+        public byte[] Read(string key)
         {
             throw new NotImplementedException();
         }
 
-        public void WriteAllBytes(byte[] bytes)
+        public void Delete(string key)
         {
             throw new NotImplementedException();
         }
 
-        public byte[] ReadAllBytes()
+        public bool HasKey(string key)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete()
+        public void WriteAll(Dictionary<string, byte[]> allData)
         {
             throw new NotImplementedException();
         }
 
-        public bool Exists()
+        public Dictionary<string, byte[]> ReadAll()
         {
             throw new NotImplementedException();
         }

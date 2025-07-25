@@ -9,7 +9,7 @@ namespace MonsterSave.Runtime
         Binary,
     }
 
-    public enum Media
+    public enum Backend
     {
         LocalFile,
         PlayerPrefs,
@@ -32,7 +32,7 @@ namespace MonsterSave.Runtime
     public class MonsterSaveConfig : ScriptableObject
     {
         [Header("General")] [Tooltip("序列化格式")] public Format format = Format.JSON;
-        [Tooltip("存储介质")] public Media media = Media.MemoryOnly;
+        [Tooltip("存储后端")] public Backend backend = Backend.MemoryOnly;
         [Tooltip("加密格式")] public Encryption encryption = Encryption.None;
         [Tooltip("缓存策略")] public Cache cache = Cache.None;
 

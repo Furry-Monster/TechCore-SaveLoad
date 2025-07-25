@@ -195,6 +195,16 @@ namespace MonsterSave.Runtime
             return null;
         }
 
+        public byte[] Serialize<T>(T obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T Deserialize<T>(byte[] data)
+        {
+            throw new NotImplementedException();
+        }
+
         protected abstract byte[] SerializeHandler(object serializable);
         protected abstract object DeserializeHandler(Type type, byte[] bytes);
     }

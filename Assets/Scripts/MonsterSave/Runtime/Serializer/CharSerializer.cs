@@ -119,6 +119,7 @@ namespace MonsterSave.Runtime
             return RecursiveDeserialize(type, content);
         }
 
+
         private object RecursiveDeserialize(Type type, string content)
         {
             if (string.IsNullOrEmpty(content) || type == null)
@@ -207,6 +208,33 @@ namespace MonsterSave.Runtime
             }
 
             return null;
+        }
+
+        public byte[] Serialize<T>(T obj)
+        {
+            if (obj == null)
+                return null;
+
+            if (typeof(T).IsSerializable)
+                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
+
+            var content = RecursiveSerialize(obj);
+            if (content == null)
+                return null;
+
+            return Encoding.UTF8.GetBytes(content);
+        }
+
+        public T Deserialize<T>(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+                return default;
+            if (!typeof(T).IsSerializable)
+                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
+
+
+            var content = Encoding.UTF8.GetString(data, 0, data.Length);
+            return (T)RecursiveDeserialize(typeof(T), content);
         }
 
         protected abstract string SerializeHandler(object serializable);

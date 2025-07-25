@@ -117,7 +117,7 @@ namespace MonsterSave.Editor
 
         private string _createdFileName;
         private Format _createdFormat;
-        private Media _createdMedia;
+        private Backend _createdBackend;
         private Encryption _createdEncryption;
         private Cache _createdCache;
         private string _createdStoragePath;
@@ -132,7 +132,7 @@ namespace MonsterSave.Editor
             {
                 _createdFileName = "MonsterSaveConfig.asset";
                 _createdFormat = _selectedConfig.format;
-                _createdMedia = _selectedConfig.media;
+                _createdBackend = _selectedConfig.backend;
                 _createdEncryption = _selectedConfig.encryption;
                 _createdCache = _selectedConfig.cache;
                 _createdStoragePath = _selectedConfig.storagePath;
@@ -149,7 +149,7 @@ namespace MonsterSave.Editor
 
             Label("General", EditorStyles.boldLabel);
             _createdFormat = (Format)EditorGUILayout.EnumPopup("序列化格式", _createdFormat);
-            _createdMedia = (Media)EditorGUILayout.EnumPopup("存储介质", _createdMedia);
+            _createdBackend = (Backend)EditorGUILayout.EnumPopup("存储后端", _createdBackend);
             _createdEncryption = (Encryption)EditorGUILayout.EnumPopup("加密格式", _createdEncryption);
             _createdCache = (Cache)EditorGUILayout.EnumPopup("缓存策略", _createdCache);
             _createdStoragePath = EditorGUILayout.TextField("存储路径", _createdStoragePath);
@@ -175,7 +175,7 @@ namespace MonsterSave.Editor
                 {
                     // 写回所有字段，确保最新
                     newConfig.format = _createdFormat;
-                    newConfig.media = _createdMedia;
+                    newConfig.backend = _createdBackend;
                     newConfig.encryption = _createdEncryption;
                     newConfig.cache = _createdCache;
                     newConfig.storagePath = _createdStoragePath;
@@ -204,7 +204,7 @@ namespace MonsterSave.Editor
         }
 
         private Format _editFormat;
-        private Media _editMedia;
+        private Backend _editBackend;
         private Encryption _editEncryption;
         private Cache _editCache;
         private string _editStoragePath;
@@ -221,7 +221,7 @@ namespace MonsterSave.Editor
             if (!_editInitialized)
             {
                 _editFormat = _selectedConfig.format;
-                _editMedia = _selectedConfig.media;
+                _editBackend = _selectedConfig.backend;
                 _editEncryption = _selectedConfig.encryption;
                 _editCache = _selectedConfig.cache;
                 _editStoragePath = _selectedConfig.storagePath;
@@ -236,7 +236,7 @@ namespace MonsterSave.Editor
             // General
             Label("General", EditorStyles.boldLabel);
             _editFormat = (Format)EditorGUILayout.EnumPopup("序列化格式", _editFormat);
-            _editMedia = (Media)EditorGUILayout.EnumPopup("存储介质", _editMedia);
+            _editBackend = (Backend)EditorGUILayout.EnumPopup("存储后端", _editBackend);
             _editCache = (Cache)EditorGUILayout.EnumPopup("缓存策略", _editCache);
             _editEncryption = (Encryption)EditorGUILayout.EnumPopup("加密格式", _editEncryption);
             _editStoragePath = EditorGUILayout.TextField("存储路径", _editStoragePath);
@@ -252,7 +252,7 @@ namespace MonsterSave.Editor
             {
                 // 只有点击保存才写回
                 _selectedConfig.format = _editFormat;
-                _selectedConfig.media = _editMedia;
+                _selectedConfig.backend = _editBackend;
                 _selectedConfig.cache = _editCache;
                 _selectedConfig.encryption = _editEncryption;
                 _selectedConfig.storagePath = _editStoragePath;
