@@ -14,8 +14,8 @@ namespace MonsterSave.Runtime
             if (!obj.GetType().IsSerializable)
                 throw new InvalidCastException($"{obj.GetType().FullName} is not [Serializable].");
 
-            var content = RecursiveSerialize(obj);
-            return content;
+            var data = RecursiveSerialize(obj);
+            return data;
         }
 
         private byte[] RecursiveSerialize(object obj)
@@ -107,7 +107,8 @@ namespace MonsterSave.Runtime
             if (data == null || data.Length == 0)
                 return null;
 
-            return RecursiveDeserialize(type, data);
+            var obj = RecursiveDeserialize(type, data);
+            return obj;
         }
 
         private object RecursiveDeserialize(Type type, byte[] data)
@@ -197,12 +198,24 @@ namespace MonsterSave.Runtime
 
         public byte[] Serialize<T>(T obj)
         {
-            throw new NotImplementedException();
+            if (obj == null)
+                return null;
+            if (!typeof(T).IsSerializable)
+                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
+
+            var data = RecursiveSerialize(obj);
+            return data;
         }
 
         public T Deserialize<T>(byte[] data)
         {
-            throw new NotImplementedException();
+            if (data == null || data.Length == 0)
+                return default;
+            if (!typeof(T).IsSerializable)
+                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
+
+            var obj = RecursiveDeserialize(typeof(T), data);
+            return (T)obj;
         }
 
         protected abstract byte[] SerializeHandler(object serializable);

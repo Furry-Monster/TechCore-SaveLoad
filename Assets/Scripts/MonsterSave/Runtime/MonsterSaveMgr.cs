@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MonsterSave.Runtime
@@ -12,25 +13,28 @@ namespace MonsterSave.Runtime
         public static MonsterSaveConfig Config
         {
             get => _config;
-            set
-            {
-                _config = value;
-                OnConfigUpdated?.Invoke();
-            }
+            set { _config = value; }
         }
 
-        public static Action OnConfigUpdated { get; set; }
 
         static MonsterSaveMgr()
         {
-            // 初始化可序列化类型
-            TypeRegistry.Initialize();
-            // 初始化存储部分
-            StorageProvider = new StorageProvider();
             // 加载默认配置
             Config = Resources.Load<MonsterSaveConfig>("DefaultConfig");
             if (Config == null)
                 throw new Exception("Default config not found");
+
+            // 初始化可序列化类型
+            TypeRegistry.Initialize();
+            // 初始化存储部分
+            StorageProvider = new StorageProvider(Config);
         }
+
+        public static void Set<T>(string key, T data) => StorageProvider.Set(key, data);
+        public static T Get<T>(string key, T defaultValue = default) => StorageProvider.Get<T>(key, defaultValue);
+        public static void Delete(string key) => StorageProvider.Delete(key);
+        public static bool Exist(string key) => StorageProvider.Exist(key);
+        public static void SyncAll(Dictionary<string, object> allData) => StorageProvider.SyncAll(allData);
+        public static Dictionary<string, object> LoadAll() => StorageProvider.LoadAll();
     }
 }

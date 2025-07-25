@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,9 +13,6 @@ namespace MonsterSave.Runtime
         {
             if (obj == null)
                 return null;
-
-            if (!obj.GetType().IsSerializable)
-                throw new InvalidCastException($"{obj.GetType().FullName} is not [Serializable].");
 
             var content = RecursiveSerialize(obj);
             if (content == null)
@@ -31,8 +29,38 @@ namespace MonsterSave.Runtime
             var type = obj.GetType();
 
             // 1.如果是字符串或者值类型，直接返回(叶子节点)
-            if (obj is string || type.IsValueType)
+            if (type == typeof(string) || type.IsValueType)
                 return SerializeHandler(obj);
+
+            // 1.5. 集合类型特殊处理
+            // Dictionary<,>
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                var dict = (IDictionary)obj;
+                var dictContent = new Dictionary<string, string>();
+                foreach (var key in dict.Keys)
+                {
+                    var keyStr = RecursiveSerialize(key);
+                    var valueStr = RecursiveSerialize(dict[key]);
+                    dictContent[keyStr] = valueStr;
+                }
+
+                // 递归序列化为字符串
+                return RecursiveSerialize(dictContent);
+            }
+
+            // List<T> 或数组
+            if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+            {
+                // 排除字符串本身
+                var list = (IEnumerable)obj;
+                var items = new List<string>();
+                foreach (var item in list)
+                    items.Add(RecursiveSerialize(item));
+
+                // 递归序列化为字符串（可自定义格式）
+                return RecursiveSerialize(items);
+            }
 
             // 2.如果不是可序列化类型
             if (!type.IsSerializable)
@@ -43,28 +71,6 @@ namespace MonsterSave.Runtime
                         .GetAdapter(type)
                         .ConvertToSerializable(obj);
                     return RecursiveSerialize(adaptedValue);
-                }
-
-                // 处理未注册的数据结构
-                if (type.IsGenericEnumerable())
-                {
-                    var args = type.GetGenericArguments();
-                    var invalid = new List<Type>();
-                    foreach (var arg in args)
-                    {
-                        if (arg.IsGenericEnumerable())
-                            throw new NotSupportedException(
-                                $"Generic Type <{type.FullName}> has non-serializable arguments :{arg.FullName}");
-                        if (!arg.IsSerializable)
-                            invalid.Add(arg);
-                    }
-
-                    if (invalid.Count > 0)
-                        throw new NotSupportedException(
-                            $"Generic Type <{type.FullName}> has non-serializable arguments :{invalid}");
-
-                    // TODO:如果所有参数都可序列化，用默认方式处理数据结构
-                    throw new NotImplementedException();
                 }
             }
 
@@ -110,8 +116,6 @@ namespace MonsterSave.Runtime
         {
             if (type == null)
                 return null;
-            if (!type.IsSerializable)
-                throw new InvalidCastException($"{type.FullName} is not [Serializable].");
             if (data == null || data.Length == 0)
                 return null;
 
@@ -129,6 +133,47 @@ namespace MonsterSave.Runtime
             if (type == typeof(string) || type.IsValueType)
                 return DeserializeHandler(type, content);
 
+            // 1.5. 集合类型处理
+            // Dictionary<,>
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                var dictContent =
+                    (Dictionary<string, string>)RecursiveDeserialize(typeof(Dictionary<string, string>), content);
+
+                var keyType = type.GetGenericArguments()[0];
+                var valueType = type.GetGenericArguments()[1];
+                var dictType = type.GetGenericTypeDefinition().MakeGenericType(keyType, valueType);
+                var dict = Activator.CreateInstance(dictType) as IDictionary;
+                if (dict == null)
+                    return null;
+
+                foreach (var entry in dictContent)
+                {
+                    var key = RecursiveDeserialize(keyType, entry.Key);
+                    var value = RecursiveDeserialize(valueType, entry.Value);
+                    dict[key] = value;
+                }
+
+                return dict;
+            }
+
+            // Array<>或者 List<>
+            if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+            {
+                var items = (List<string>)RecursiveDeserialize(typeof(List<string>), content);
+
+                var itemType = type.GetGenericArguments()[0];
+                var listType = typeof(List<>).MakeGenericType(itemType);
+                var list = Activator.CreateInstance(listType) as IList;
+                if (list == null)
+                    return null;
+
+                foreach (var item in items)
+                    list.Add(RecursiveDeserialize(itemType, item));
+
+                return list;
+            }
+
             // 2. 不可序列化类型
             if (!type.IsSerializable)
             {
@@ -140,28 +185,6 @@ namespace MonsterSave.Runtime
                     return TypeRegistry
                         .GetAdapter(type)
                         .ConvertFromSerializable(adaptedValue);
-                }
-
-                // 然后再采用默认处理
-                if (type.IsGenericEnumerable())
-                {
-                    var args = type.GetGenericArguments();
-                    var invalid = new List<Type>();
-                    foreach (var arg in args)
-                    {
-                        if (arg.IsGenericEnumerable())
-                            throw new NotSupportedException(
-                                $"Generic Type <{type.FullName}> has non-serializable arguments :{arg.FullName}");
-                        if (!arg.IsSerializable)
-                            invalid.Add(arg);
-                    }
-
-                    if (invalid.Count > 0)
-                        throw new NotSupportedException(
-                            $"Generic Type <{type.FullName}> has non-serializable arguments :{invalid}");
-
-                    // TODO:如果所有参数都可序列化，用默认方式处理数据结构
-                    throw new NotImplementedException();
                 }
             }
 
@@ -215,9 +238,6 @@ namespace MonsterSave.Runtime
             if (obj == null)
                 return null;
 
-            if (typeof(T).IsSerializable)
-                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
-
             var content = RecursiveSerialize(obj);
             if (content == null)
                 return null;
@@ -229,9 +249,6 @@ namespace MonsterSave.Runtime
         {
             if (data == null || data.Length == 0)
                 return default;
-            if (!typeof(T).IsSerializable)
-                throw new InvalidCastException($"{typeof(T).FullName} is not [Serializable].");
-
 
             var content = Encoding.UTF8.GetString(data, 0, data.Length);
             return (T)RecursiveDeserialize(typeof(T), content);

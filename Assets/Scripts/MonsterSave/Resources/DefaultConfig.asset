@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultConfig
   m_EditorClassIdentifier: 
   format: 0
-  media: 2
+  backend: 0
   encryption: 0
   cache: 0
   storagePath: 

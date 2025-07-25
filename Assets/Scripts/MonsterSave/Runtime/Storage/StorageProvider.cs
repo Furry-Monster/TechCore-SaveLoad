@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
@@ -8,38 +10,34 @@ namespace MonsterSave.Runtime
         private ISerializer _serializer;
         private IStorageBackend _backend;
 
-        public StorageProvider()
+        public StorageProvider(MonsterSaveConfig config)
         {
-            MonsterSaveMgr.OnConfigUpdated += () =>
+            var backendEnum = config.backend;
+            var formatEnum = config.format;
+
+            _backend = backendEnum switch
             {
-                var config = MonsterSaveMgr.Config;
+                Backend.LocalFile => new LocalFileBackend(config),
+                Backend.PlayerPrefs => new PlayerPrefBackend(),
+                Backend.MemoryOnly => null,
+                Backend.Database => null,
+                Backend.Cloud => new CloudBackend(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
-                var backendEnum = config.backend;
-                var formatEnum = config.format;
-
-                _backend = backendEnum switch
-                {
-                    Backend.LocalFile => new LocalFileBackend(),
-                    Backend.PlayerPrefs => new PlayerPrefBackend(),
-                    Backend.MemoryOnly => null,
-                    Backend.Database => null,
-                    Backend.Cloud => new CloudBackend(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-
-                _serializer = formatEnum switch
-                {
-                    Format.JSON => new DefaultJSONSerializer(),
-                    Format.XML => new DefaultXMLSerializer(),
-                    Format.Binary => new DefaultBinarySerializer(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+            _serializer = formatEnum switch
+            {
+                Format.JSON => new DefaultJSONSerializer(),
+                Format.XML => new DefaultXMLSerializer(),
+                Format.Binary => new DefaultBinarySerializer(),
+                _ => throw new ArgumentOutOfRangeException()
             };
         }
 
         public void Set<T>(string key, T data)
         {
             var serialized = _serializer.Serialize(data);
+            Debug.Log(Encoding.UTF8.GetString(serialized, 0, serialized.Length));
             _backend.Write(key, serialized);
         }
 

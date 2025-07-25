@@ -7,24 +7,21 @@ namespace MonsterSave.Runtime
 {
     public class LocalFileBackend : IStorageBackend
     {
-        private string _path;
-        private ISerializer _serializer;
+        private readonly string _path;
+        private readonly ISerializer _serializer;
 
-        public LocalFileBackend()
+        public LocalFileBackend(MonsterSaveConfig config)
         {
-            MonsterSaveMgr.OnConfigUpdated += () =>
+            _path = !string.IsNullOrEmpty(config.storagePath)
+                ? config.storagePath
+                : Application.persistentDataPath + "/save.ms";
+
+            _serializer = config.format switch
             {
-                var config = MonsterSaveMgr.Config;
-
-                _path = config.storagePath ?? Application.persistentDataPath + "/save.ms";
-
-                _serializer = config.format switch
-                {
-                    Format.JSON => new DefaultJSONSerializer(),
-                    Format.XML => new DefaultXMLSerializer(),
-                    Format.Binary => new DefaultBinarySerializer(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                Format.JSON => new DefaultJSONSerializer(),
+                Format.XML => new DefaultXMLSerializer(),
+                Format.Binary => new DefaultBinarySerializer(),
+                _ => throw new ArgumentOutOfRangeException()
             };
         }
 
@@ -92,7 +89,7 @@ namespace MonsterSave.Runtime
         {
             var directory = Path.GetDirectoryName(_path);
             if (string.IsNullOrEmpty(directory))
-                throw new Exception("Can't get directory path from the given path string.");
+                throw new Exception($"Can't get directory path from {_path}");
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
         }
