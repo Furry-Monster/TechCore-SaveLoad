@@ -34,24 +34,5 @@ public class MonsterSaveTest : MonoBehaviour
         MonsterSaveMgr.Delete("isAlive");
         Debug.Log("After delete, isAlive: " + MonsterSaveMgr.Get<bool>("isAlive", false));
         Debug.Log("Pass case 5");
-
-        // 5. 批量同步
-        var allData = new Dictionary<string, object>
-        {
-            { "playerName", "NewName" },
-            { "score", 99999 },
-            { "level", 7 }
-        };
-        MonsterSaveMgr.SyncAll(allData);
-        Debug.Log("Pass case 6");
-
-        // 6. 批量读取
-        var loaded = MonsterSaveMgr.LoadAll();
-        foreach (var kv in loaded)
-        {
-            Debug.Log($"[LoadAll] {kv.Key} = {kv.Value}");
-        }
-
-        Debug.Log("Pass case 7");
     }
 }

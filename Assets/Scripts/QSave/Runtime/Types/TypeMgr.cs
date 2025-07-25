@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace MonsterSave.Runtime
+namespace QSave.Runtime
 {
-    public static class TypeRegistry
+    public static class TypeMgr
     {
         private static readonly Dictionary<Type, ITypeAdapter> Adapters = new();
 

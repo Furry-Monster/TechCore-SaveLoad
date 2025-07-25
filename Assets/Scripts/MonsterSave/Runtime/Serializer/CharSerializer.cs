@@ -65,9 +65,9 @@ namespace MonsterSave.Runtime
             // 2.如果不是可序列化类型
             if (!type.IsSerializable)
             {
-                if (TypeRegistry.HasAdapter(type))
+                if (TypeMgr.HasAdapter(type))
                 {
-                    var adaptedValue = TypeRegistry
+                    var adaptedValue = TypeMgr
                         .GetAdapter(type)
                         .ConvertToSerializable(obj);
                     return RecursiveSerialize(adaptedValue);
@@ -178,11 +178,11 @@ namespace MonsterSave.Runtime
             if (!type.IsSerializable)
             {
                 // 首先尝试转型
-                if (TypeRegistry.HasAdapter(type))
+                if (TypeMgr.HasAdapter(type))
                 {
-                    var adaptedType = TypeRegistry.GetAdapter(type).TargetType;
+                    var adaptedType = TypeMgr.GetAdapter(type).TargetType;
                     var adaptedValue = RecursiveDeserialize(adaptedType, content);
-                    return TypeRegistry
+                    return TypeMgr
                         .GetAdapter(type)
                         .ConvertFromSerializable(adaptedValue);
                 }
