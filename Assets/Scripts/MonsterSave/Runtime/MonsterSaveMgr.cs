@@ -5,7 +5,7 @@ namespace MonsterSave.Runtime
 {
     public static class MonsterSaveMgr
     {
-        private static readonly IStorageProvider StorageProviderSystem;
+        private static readonly IStorageProvider StorageProvider;
 
         private static MonsterSaveConfig _config;
 
@@ -23,9 +23,10 @@ namespace MonsterSave.Runtime
 
         static MonsterSaveMgr()
         {
+            // 初始化可序列化类型
             TypeRegistry.Initialize();
-            StorageProviderSystem = new StorageProvider();
-
+            // 初始化存储部分
+            StorageProvider = new StorageProvider();
             // 加载默认配置
             Config = Resources.Load<MonsterSaveConfig>("DefaultConfig");
             if (Config == null)

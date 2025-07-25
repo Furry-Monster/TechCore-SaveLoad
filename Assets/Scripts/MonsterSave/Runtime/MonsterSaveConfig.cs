@@ -14,6 +14,8 @@ namespace MonsterSave.Runtime
         LocalFile,
         PlayerPrefs,
         MemoryOnly,
+        Database,
+        Cloud,
     }
 
     public enum Cache

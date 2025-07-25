@@ -4,6 +4,7 @@ namespace MonsterSave.Runtime
 {
     public interface IStorageBackend
     {
+        // 低层的读写接口
         void Write(string key, byte[] data);
         byte[] Read(string key);
         void Delete(string key);

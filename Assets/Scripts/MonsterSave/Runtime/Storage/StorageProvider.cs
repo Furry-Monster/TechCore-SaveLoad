@@ -5,7 +5,6 @@ namespace MonsterSave.Runtime
 {
     public class StorageProvider : IStorageProvider
     {
-        private MonsterSaveConfig _config;
         private ISerializer _serializer;
         private IStorageBackend _backend;
 
@@ -13,16 +12,18 @@ namespace MonsterSave.Runtime
         {
             MonsterSaveMgr.OnConfigUpdated += () =>
             {
-                _config = MonsterSaveMgr.Config;
+                var config = MonsterSaveMgr.Config;
 
-                var mediaEnum = _config.backend;
-                var formatEnum = _config.format;
+                var backendEnum = config.backend;
+                var formatEnum = config.format;
 
-                _backend = mediaEnum switch
+                _backend = backendEnum switch
                 {
                     Backend.LocalFile => new LocalFileBackend(),
-                    Backend.PlayerPrefs => null,
+                    Backend.PlayerPrefs => new PlayerPrefBackend(),
                     Backend.MemoryOnly => null,
+                    Backend.Database => null,
+                    Backend.Cloud => new CloudBackend(),
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
@@ -38,32 +39,37 @@ namespace MonsterSave.Runtime
 
         public void Set<T>(string key, T data)
         {
-            throw new NotImplementedException();
+            var serialized = _serializer.Serialize(data);
+            _backend.Write(key, serialized);
         }
 
         public T Get<T>(string key, T defaultValue = default)
         {
-            throw new NotImplementedException();
+            var serialized = _backend.Read(key);
+            return serialized == null
+                ? defaultValue
+                : _serializer.Deserialize<T>(serialized);
         }
 
-        public void Delete(string key)
-        {
-            throw new NotImplementedException();
-        }
+        public void Delete(string key) => _backend.Delete(key);
 
-        public bool Exist(string key)
-        {
-            throw new NotImplementedException();
-        }
+        public bool Exist(string key) => _backend.HasKey(key);
 
         public void SyncAll(Dictionary<string, object> allData)
         {
-            throw new NotImplementedException();
+            var serialized = new Dictionary<string, byte[]>();
+            foreach (var pair in allData)
+                serialized[pair.Key] = _serializer.Serialize(pair.Value);
+            _backend.WriteAll(serialized);
         }
 
         public Dictionary<string, object> LoadAll()
         {
-            throw new NotImplementedException();
+            var native = new Dictionary<string, object>();
+            var serialized = _backend.ReadAll();
+            foreach (var pair in serialized)
+                native[pair.Key] = _serializer.Serialize(pair.Value);
+            return native;
         }
     }
 }

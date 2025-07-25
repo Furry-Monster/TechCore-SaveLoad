@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace MonsterSave.Runtime
 {
@@ -7,32 +7,41 @@ namespace MonsterSave.Runtime
     {
         public void Write(string key, byte[] data)
         {
-            throw new NotImplementedException();
+            Debug.Log($"[CloudBackend] Upload {key} (size={data?.Length})");
+            // TODO: 接入实际云存储SDK
         }
 
         public byte[] Read(string key)
         {
-            throw new NotImplementedException();
+            Debug.Log($"[CloudBackend] Download {key}");
+            // TODO: 接入实际云存储SDK
+            return null;
         }
 
         public void Delete(string key)
         {
-            throw new NotImplementedException();
+            Debug.Log($"[CloudBackend] Delete {key}");
+            // TODO: 接入实际云存储SDK
         }
 
         public bool HasKey(string key)
         {
-            throw new NotImplementedException();
+            Debug.Log($"[CloudBackend] Check Exists {key}");
+            // TODO: 接入实际云存储SDK
+            return false;
         }
 
         public void WriteAll(Dictionary<string, byte[]> allData)
         {
-            throw new NotImplementedException();
+            foreach (var kv in allData)
+                Write(kv.Key, kv.Value);
         }
 
         public Dictionary<string, byte[]> ReadAll()
         {
-            throw new NotImplementedException();
+            Debug.Log("[CloudBackend] ReadAll not implemented.");
+            // TODO: 接入实际云存储SDK
+            return new Dictionary<string, byte[]>();
         }
     }
 }

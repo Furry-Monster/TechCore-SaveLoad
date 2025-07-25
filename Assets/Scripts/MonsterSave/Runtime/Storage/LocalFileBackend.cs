@@ -8,80 +8,93 @@ namespace MonsterSave.Runtime
     public class LocalFileBackend : IStorageBackend
     {
         private string _path;
+        private ISerializer _serializer;
 
         public LocalFileBackend()
         {
             MonsterSaveMgr.OnConfigUpdated += () =>
             {
-                _path = MonsterSaveMgr.Config.storagePath
-                        ?? Application.persistentDataPath + "save.ms";
+                var config = MonsterSaveMgr.Config;
+
+                _path = config.storagePath ?? Application.persistentDataPath + "/save.ms";
+
+                _serializer = config.format switch
+                {
+                    Format.JSON => new DefaultJSONSerializer(),
+                    Format.XML => new DefaultXMLSerializer(),
+                    Format.Binary => new DefaultBinarySerializer(),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
             };
         }
 
-        public void WriteAllText(string content)
+        // 读取整个存档文件为字典
+        private Dictionary<string, byte[]> LoadAllInternal()
         {
-            EnsureDirectory();
-            File.WriteAllText(_path, content);
+            if (!File.Exists(_path))
+                return new Dictionary<string, byte[]>();
+            var bytes = File.ReadAllBytes(_path);
+            return _serializer.Deserialize<Dictionary<string, byte[]>>(bytes);
         }
 
-        public string ReadAllText() => Exists() ? File.ReadAllText(_path) : null;
-
-        public void WriteAllBytes(byte[] bytes)
+        // 写入整个字典到存档文件
+        private void SaveAllInternal(Dictionary<string, byte[]> allData)
         {
             EnsureDirectory();
+            var bytes = _serializer.Serialize(allData);
             File.WriteAllBytes(_path, bytes);
-        }
-
-        public byte[] ReadAllBytes() => Exists() ? File.ReadAllBytes(_path) : null;
-
-        public void Delete()
-        {
-            if (File.Exists(_path))
-            {
-                File.Delete(_path);
-            }
-        }
-
-        public bool Exists() => File.Exists(_path);
-
-        private void EnsureDirectory()
-        {
-            var directory = Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(directory))
-                throw new Exception("Can't get directory path from the given path string.");
-
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
         }
 
         public void Write(string key, byte[] data)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(key))
+                throw new ArgumentNullException(nameof(key));
+            if (data == null || data.Length == 0)
+                throw new ArgumentNullException(nameof(data));
+
+            var allData = LoadAllInternal();
+            allData[key] = data;
+            SaveAllInternal(allData);
         }
 
         public byte[] Read(string key)
         {
-            throw new NotImplementedException();
+            var allData = LoadAllInternal();
+            return allData.GetValueOrDefault(key);
         }
 
         public void Delete(string key)
         {
-            throw new NotImplementedException();
+            var allData = LoadAllInternal();
+            if (allData.Remove(key))
+                SaveAllInternal(allData);
         }
 
         public bool HasKey(string key)
         {
-            throw new NotImplementedException();
+            var allData = LoadAllInternal();
+            return allData.ContainsKey(key);
         }
 
         public void WriteAll(Dictionary<string, byte[]> allData)
         {
-            throw new NotImplementedException();
+            if (allData == null)
+                throw new ArgumentNullException(nameof(allData));
+            SaveAllInternal(allData);
         }
 
         public Dictionary<string, byte[]> ReadAll()
         {
-            throw new NotImplementedException();
+            return LoadAllInternal();
+        }
+
+        private void EnsureDirectory()
+        {
+            var directory = Path.GetDirectoryName(_path);
+            if (string.IsNullOrEmpty(directory))
+                throw new Exception("Can't get directory path from the given path string.");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
         }
     }
 }
