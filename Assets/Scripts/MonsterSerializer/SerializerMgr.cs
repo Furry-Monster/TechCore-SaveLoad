@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 
 namespace MonsterSerializer
@@ -7,24 +8,30 @@ namespace MonsterSerializer
     {
         // ReSharper disable once InconsistentNaming
         private static readonly Lazy<SerializerMgr> _instance = new(() => new SerializerMgr());
-
-        private ISerializer _currentSerializer;
         private bool _disposed;
+
+        private ITypeAdapter _typeAdapter;
+        private ISerializer _serializer;
+        private IEncryptor _encryptor;
 
         protected SerializerMgr()
         {
-            _currentSerializer = new JSONSerializer();
+            _typeAdapter = null;
+            _serializer = new JSONSerializer();
+            _encryptor = null;
         }
 
         public static SerializerMgr Instance => _instance.Value;
 
         public void Dispose()
         {
-            if (!_disposed)
-            {
-                _currentSerializer = null;
-                _disposed = true;
-            }
+            if (_disposed)
+                return;
+
+            _typeAdapter = null;
+            _serializer = null;
+            _encryptor = null;
+            _disposed = true;
         }
 
         public byte[] Serialize(object obj)
@@ -33,12 +40,15 @@ namespace MonsterSerializer
                 throw new ObjectDisposedException(nameof(SerializerMgr));
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
-            if (_currentSerializer == null)
+            if (_serializer == null)
                 throw new InvalidOperationException("Serializer is not initialized.");
 
             try
             {
-                return _currentSerializer.Serialize(obj);
+                var adapted = _typeAdapter?.Adapt(obj);
+                var serialized = _serializer.Serialize(adapted);
+                var encrypted = _encryptor?.Encrypt(serialized);
+                return encrypted;
             }
             catch (Exception ex)
             {
@@ -54,12 +64,15 @@ namespace MonsterSerializer
                 throw new ArgumentNullException(nameof(type));
             if (bytes == null)
                 throw new ArgumentNullException(nameof(bytes));
-            if (_currentSerializer == null)
+            if (_serializer == null)
                 throw new InvalidOperationException("Serializer is not initialized.");
 
             try
             {
-                return _currentSerializer.Deserialize(type, bytes);
+                var decrypted = _encryptor?.Decrypt(bytes);
+                var deserialized = _serializer.Deserialize(type, decrypted);
+                var deadapted = _typeAdapter?.Restore(deserialized);
+                return deadapted;
             }
             catch (Exception ex)
             {
@@ -67,13 +80,29 @@ namespace MonsterSerializer
             }
         }
 
-        public void SetSerializer(ISerializer serializer)
+        public void SetTypeAdapter(ITypeAdapter typeAdapter)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(SerializerMgr));
 
-            _currentSerializer = serializer ??
-                                 throw new ArgumentNullException(nameof(serializer));
+            _typeAdapter = typeAdapter;
+        }
+
+        public void SetSerializer([NotNull] ISerializer serializer)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(SerializerMgr));
+
+            _serializer = serializer
+                          ?? throw new ArgumentNullException(nameof(serializer));
+        }
+
+        public void SetEncryptor(IEncryptor encryptor)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(SerializerMgr));
+
+            _encryptor = encryptor;
         }
     }
 }
