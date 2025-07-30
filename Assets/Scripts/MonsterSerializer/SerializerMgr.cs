@@ -9,14 +9,12 @@ namespace MonsterSerializer
         // ReSharper disable once InconsistentNaming
         private static readonly Lazy<SerializerMgr> _instance = new(() => new SerializerMgr());
         private bool _disposed;
-
-        private ITypeAdapter _typeAdapter;
-        private ISerializer _serializer;
         private IEncryptor _encryptor;
+        private ISerializer _serializer;
+
 
         protected SerializerMgr()
         {
-            _typeAdapter = null;
             _serializer = new JSONSerializer();
             _encryptor = null;
         }
@@ -28,7 +26,6 @@ namespace MonsterSerializer
             if (_disposed)
                 return;
 
-            _typeAdapter = null;
             _serializer = null;
             _encryptor = null;
             _disposed = true;
@@ -45,9 +42,8 @@ namespace MonsterSerializer
 
             try
             {
-                var adapted = _typeAdapter?.Adapt(obj);
-                var serialized = _serializer.Serialize(adapted);
-                var encrypted = _encryptor?.Encrypt(serialized);
+                var serialized = _serializer.Serialize(obj);
+                var encrypted = _encryptor?.Encrypt(serialized) ?? serialized;
                 return encrypted;
             }
             catch (Exception ex)
@@ -69,23 +65,14 @@ namespace MonsterSerializer
 
             try
             {
-                var decrypted = _encryptor?.Decrypt(bytes);
+                var decrypted = _encryptor?.Decrypt(bytes) ?? bytes;
                 var deserialized = _serializer.Deserialize(type, decrypted);
-                var deadapted = _typeAdapter?.Restore(deserialized);
-                return deadapted;
+                return deserialized;
             }
             catch (Exception ex)
             {
                 throw new SerializationException("Failed to deserialize object.", ex);
             }
-        }
-
-        public void SetTypeAdapter(ITypeAdapter typeAdapter)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(SerializerMgr));
-
-            _typeAdapter = typeAdapter;
         }
 
         public void SetSerializer([NotNull] ISerializer serializer)

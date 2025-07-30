@@ -6,8 +6,8 @@ namespace MonsterSerializer
 {
     public class AESEncryptor : IEncryptor
     {
-        private readonly byte[] _key;
         private readonly byte[] _iv;
+        private readonly byte[] _key;
 
         public AESEncryptor()
         {

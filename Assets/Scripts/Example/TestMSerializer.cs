@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using MonsterSerializer;
+using MonsterSerializer.Types;
 using UnityEngine;
 
 public class TestMSerializer : MonoBehaviour
@@ -13,13 +14,19 @@ public class TestMSerializer : MonoBehaviour
             name = "Elysia",
             score = new List<int> { 1, 2, 3, 4, 5, 6, 7 },
             position = new Vector3(11, 45, 14),
-            rotation = new Quaternion(19, 19, 81, 0)
+            rotation = new Quaternion(19, 19, 81, 0),
+            diary = new SerializableDictionary<int, SerializableDictionary<int, int>>
+            {
+                { 1, new SerializableDictionary<int, int> { { 1, 2 }, { 2, 3 }, { 3, 4 } } },
+                { 2, new SerializableDictionary<int, int> { { 2, 3 }, { 3, 4 }, { 4, 5 } } },
+                { 3, new SerializableDictionary<int, int> { { 3, 4 }, { 4, 5 }, { 5, 6 } } },
+            }
         };
 
         var result = MSerializer.Serialize(playerData, new SerializerSetting
         {
             Format = Format.JSON,
-            Encryption = Encryption.AES
+            Encryption = Encryption.None
         });
 
         File.WriteAllBytes(Application.dataPath + "/Resources/save1", result);
@@ -36,5 +43,6 @@ public class TestMSerializer : MonoBehaviour
         public List<int> score;
         public Vector3 position;
         public Quaternion rotation;
+        public SerializableDictionary<int, SerializableDictionary<int, int>> diary;
     }
 }

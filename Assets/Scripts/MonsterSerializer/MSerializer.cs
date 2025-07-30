@@ -31,18 +31,6 @@ namespace MonsterSerializer
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-
-                switch (settings.TypeAdapt)
-                {
-                    case TypeAdapt.None:
-                        SerializerMgr.Instance.SetTypeAdapter(null);
-                        break;
-                    case TypeAdapt.Auto:
-                        SerializerMgr.Instance.SetTypeAdapter(new AutoTypeAdapter());
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
             }
 
             return SerializerMgr.Instance.Serialize(obj);
@@ -71,18 +59,6 @@ namespace MonsterSerializer
                         break;
                     case Encryption.AES:
                         SerializerMgr.Instance.SetEncryptor(new AESEncryptor());
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                switch (settings.TypeAdapt)
-                {
-                    case TypeAdapt.None:
-                        SerializerMgr.Instance.SetTypeAdapter(null);
-                        break;
-                    case TypeAdapt.Auto:
-                        SerializerMgr.Instance.SetTypeAdapter(new AutoTypeAdapter());
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
