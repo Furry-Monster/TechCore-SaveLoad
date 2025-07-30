@@ -3,18 +3,18 @@ namespace MonsterSerializer
     public enum Format
     {
         JSON,
-        XML,
+        XML
     }
 
     public enum Encryption
     {
         None,
-        AES,
+        AES
     }
 
     public class SerializerSetting
     {
-        public Format Format = Format.JSON;
         public Encryption Encryption = Encryption.None;
+        public Format Format = Format.JSON;
     }
 }

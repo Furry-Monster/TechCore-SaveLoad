@@ -50,26 +50,24 @@ namespace MonsterSave.Runtime
         {
             // 首先直接查找具体类型
             if (Adapters.TryGetValue(type, out var adapter))
-                return (ITypeAdapter)adapter;
+                return adapter;
 
             // 泛型类型，尝试用开放泛型类型查找
             if (type.IsGenericType)
             {
                 var genericTypeDef = type.GetGenericTypeDefinition();
                 if (Adapters.TryGetValue(genericTypeDef, out adapter))
-                    return (ITypeAdapter)adapter;
+                    return adapter;
             }
 
             // 支持IEnumerable<T>等接口
             foreach (var iface in type.GetInterfaces())
-            {
                 if (iface.IsGenericType)
                 {
                     var genericTypeDef = iface.GetGenericTypeDefinition();
                     if (Adapters.TryGetValue(genericTypeDef, out adapter))
-                        return (ITypeAdapter)adapter;
+                        return adapter;
                 }
-            }
 
             return null;
         }
@@ -91,14 +89,12 @@ namespace MonsterSave.Runtime
 
             // 3. 支持IEnumerable<T>等接口
             foreach (var iface in sourceType.GetInterfaces())
-            {
                 if (iface.IsGenericType)
                 {
                     var genericTypeDef = iface.GetGenericTypeDefinition();
                     if (Adapters.TryGetValue(genericTypeDef, out adapter))
                         return adapter as IValueAdapter<TSource, TTarget>;
                 }
-            }
 
             return null;
         }
@@ -119,14 +115,12 @@ namespace MonsterSave.Runtime
 
             // 支持IEnumerable<T>等接口
             foreach (var iface in sourceType.GetInterfaces())
-            {
                 if (iface.IsGenericType)
                 {
                     var genericTypeDef = iface.GetGenericTypeDefinition();
                     if (Adapters.ContainsKey(genericTypeDef))
                         return true;
                 }
-            }
 
             return false;
         }
@@ -148,14 +142,12 @@ namespace MonsterSave.Runtime
 
             // 3. 支持IEnumerable<T>等接口
             foreach (var iface in sourceType.GetInterfaces())
-            {
                 if (iface.IsGenericType)
                 {
                     var genericTypeDef = iface.GetGenericTypeDefinition();
                     if (Adapters.ContainsKey(genericTypeDef))
                         return true;
                 }
-            }
 
             return false;
         }

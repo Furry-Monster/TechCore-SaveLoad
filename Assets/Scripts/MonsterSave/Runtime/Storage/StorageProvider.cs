@@ -7,8 +7,8 @@ namespace MonsterSave.Runtime
 {
     public class StorageProvider : IStorageProvider
     {
-        private ISerializer _serializer;
-        private IStorageBackend _backend;
+        private readonly IStorageBackend _backend;
+        private readonly ISerializer _serializer;
 
         public StorageProvider(MonsterSaveConfig config)
         {
@@ -49,9 +49,15 @@ namespace MonsterSave.Runtime
                 : _serializer.Deserialize<T>(serialized);
         }
 
-        public void Delete(string key) => _backend.Delete(key);
+        public void Delete(string key)
+        {
+            _backend.Delete(key);
+        }
 
-        public bool Exist(string key) => _backend.HasKey(key);
+        public bool Exist(string key)
+        {
+            return _backend.HasKey(key);
+        }
 
         public void SyncAll(Dictionary<string, object> allData)
         {

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace MonsterSave.Runtime
@@ -7,14 +6,6 @@ namespace MonsterSave.Runtime
     public static class MonsterSaveMgr
     {
         private static readonly IStorageProvider StorageProvider;
-
-        private static MonsterSaveConfig _config;
-
-        public static MonsterSaveConfig Config
-        {
-            get => _config;
-            set { _config = value; }
-        }
 
 
         static MonsterSaveMgr()
@@ -30,10 +21,26 @@ namespace MonsterSave.Runtime
             StorageProvider = new StorageProvider(Config);
         }
 
-        public static void Set<T>(string key, T data) => StorageProvider.Set(key, data);
-        public static T Get<T>(string key, T defaultValue = default) => StorageProvider.Get<T>(key, defaultValue);
-        public static void Delete(string key) => StorageProvider.Delete(key);
-        public static bool Exist(string key) => StorageProvider.Exist(key);
-        
+        public static MonsterSaveConfig Config { get; set; }
+
+        public static void Set<T>(string key, T data)
+        {
+            StorageProvider.Set(key, data);
+        }
+
+        public static T Get<T>(string key, T defaultValue = default)
+        {
+            return StorageProvider.Get(key, defaultValue);
+        }
+
+        public static void Delete(string key)
+        {
+            StorageProvider.Delete(key);
+        }
+
+        public static bool Exist(string key)
+        {
+            return StorageProvider.Exist(key);
+        }
     }
 }

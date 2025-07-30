@@ -38,12 +38,19 @@ namespace MonsterSave.Runtime
             PlayerPrefs.Save();
         }
 
-        public bool HasKey(string key) => PlayerPrefs.HasKey(key);
+        public bool HasKey(string key)
+        {
+            return PlayerPrefs.HasKey(key);
+        }
 
-        public void WriteAll(Dictionary<string, byte[]> allData) =>
+        public void WriteAll(Dictionary<string, byte[]> allData)
+        {
             throw new NotSupportedException("PlayerPrefs does not support WriteAll.");
+        }
 
-        public Dictionary<string, byte[]> ReadAll() =>
+        public Dictionary<string, byte[]> ReadAll()
+        {
             throw new NotSupportedException("PlayerPrefs does not support ReadAll.");
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace MonsterSave.Runtime
     {
         JSON,
         XML,
-        Binary,
+        Binary
     }
 
     public enum Backend
@@ -15,19 +15,19 @@ namespace MonsterSave.Runtime
         PlayerPrefs,
         MemoryOnly,
         Database,
-        Cloud,
+        Cloud
     }
 
     public enum Cache
     {
         None,
-        LRU,
+        LRU
     }
 
     public enum Encryption
     {
         None,
-        AES,
+        AES
     }
 
     [CreateAssetMenu(fileName = "MonsterSaveConfig", menuName = "MonsterSave/MonsterSaveConfig")]
@@ -41,7 +41,7 @@ namespace MonsterSave.Runtime
         [Tooltip("存储路径（只在使用LocalFile时生效）")] public string storagePath = string.Empty;
         [Tooltip("API配置路径（只在使用云存储时生效）")] public string apiKey = string.Empty;
 
-        [Header("Advanced")] [Tooltip("定时保存")] public bool scheduledSync = false;
+        [Header("Advanced")] [Tooltip("定时保存")] public bool scheduledSync;
 
         [Tooltip("缓存大小(默认512)")] [Range(64, 2048)]
         public int cacheSize = 512;

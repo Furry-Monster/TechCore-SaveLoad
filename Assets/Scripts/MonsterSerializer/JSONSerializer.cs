@@ -24,6 +24,7 @@ namespace MonsterSerializer
 
             var json = Encoding.UTF8.GetString(bytes);
             var obj = JsonUtility.FromJson(json, type);
+
             return obj;
         }
     }

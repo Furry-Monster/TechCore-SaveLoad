@@ -35,9 +35,15 @@ namespace MonsterSave.Runtime
 
     public class RectAdapter : IValueAdapter<Rect, MonsterRect>
     {
-        public MonsterRect ConvertToSerializable(Rect native) => new(native);
+        public MonsterRect ConvertToSerializable(Rect native)
+        {
+            return new MonsterRect(native);
+        }
 
-        public Rect ConvertFromSerializable(MonsterRect serializable) => new(serializable.x, serializable.y,
-            serializable.width, serializable.height);
+        public Rect ConvertFromSerializable(MonsterRect serializable)
+        {
+            return new Rect(serializable.x, serializable.y,
+                serializable.width, serializable.height);
+        }
     }
 }

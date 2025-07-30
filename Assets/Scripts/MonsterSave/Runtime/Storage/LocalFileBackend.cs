@@ -25,23 +25,6 @@ namespace MonsterSave.Runtime
             };
         }
 
-        // 读取整个存档文件为字典
-        private Dictionary<string, byte[]> LoadAllInternal()
-        {
-            if (!File.Exists(_path))
-                return new Dictionary<string, byte[]>();
-            var bytes = File.ReadAllBytes(_path);
-            return _serializer.Deserialize<Dictionary<string, byte[]>>(bytes);
-        }
-
-        // 写入整个字典到存档文件
-        private void SaveAllInternal(Dictionary<string, byte[]> allData)
-        {
-            EnsureDirectory();
-            var bytes = _serializer.Serialize(allData);
-            File.WriteAllBytes(_path, bytes);
-        }
-
         public void Write(string key, byte[] data)
         {
             if (string.IsNullOrEmpty(key))
@@ -83,6 +66,23 @@ namespace MonsterSave.Runtime
         public Dictionary<string, byte[]> ReadAll()
         {
             return LoadAllInternal();
+        }
+
+        // 读取整个存档文件为字典
+        private Dictionary<string, byte[]> LoadAllInternal()
+        {
+            if (!File.Exists(_path))
+                return new Dictionary<string, byte[]>();
+            var bytes = File.ReadAllBytes(_path);
+            return _serializer.Deserialize<Dictionary<string, byte[]>>(bytes);
+        }
+
+        // 写入整个字典到存档文件
+        private void SaveAllInternal(Dictionary<string, byte[]> allData)
+        {
+            EnsureDirectory();
+            var bytes = _serializer.Serialize(allData);
+            File.WriteAllBytes(_path, bytes);
         }
 
         private void EnsureDirectory()

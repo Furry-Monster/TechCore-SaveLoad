@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace MonsterSave.Runtime
 {
     /// <summary>
-    /// 默认XML序列化器，使用System.Xml
+    ///     默认XML序列化器，使用System.Xml
     /// </summary>
     public class DefaultXMLSerializer : CharSerializer
     {

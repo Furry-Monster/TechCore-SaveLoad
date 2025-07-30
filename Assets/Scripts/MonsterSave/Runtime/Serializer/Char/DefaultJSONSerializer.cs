@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MonsterSave.Runtime
 {
     /// <summary>
-    /// 默认JSON序列化器，使用Unity内置JSONUtility
+    ///     默认JSON序列化器，使用Unity内置JSONUtility
     /// </summary>
     public class DefaultJSONSerializer : CharSerializer
     {

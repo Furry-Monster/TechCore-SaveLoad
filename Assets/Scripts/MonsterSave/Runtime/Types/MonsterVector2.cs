@@ -29,8 +29,14 @@ namespace MonsterSave.Runtime
 
     public class Vec2Adapter : IValueAdapter<Vector2, MonsterVector2>
     {
-        public MonsterVector2 ConvertToSerializable(Vector2 native) => new(native);
+        public MonsterVector2 ConvertToSerializable(Vector2 native)
+        {
+            return new MonsterVector2(native);
+        }
 
-        public Vector2 ConvertFromSerializable(MonsterVector2 serializable) => new(serializable.x, serializable.y);
+        public Vector2 ConvertFromSerializable(MonsterVector2 serializable)
+        {
+            return new Vector2(serializable.x, serializable.y);
+        }
     }
 }

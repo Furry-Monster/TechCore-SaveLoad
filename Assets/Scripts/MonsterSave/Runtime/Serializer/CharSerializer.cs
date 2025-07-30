@@ -21,6 +21,38 @@ namespace MonsterSave.Runtime
             return Encoding.UTF8.GetBytes(content);
         }
 
+        object ISerializer.Deserialize(Type type, byte[] data)
+        {
+            if (type == null)
+                return null;
+            if (data == null || data.Length == 0)
+                return null;
+
+            var content = Encoding.UTF8.GetString(data, 0, data.Length);
+            return RecursiveDeserialize(type, content);
+        }
+
+        public byte[] Serialize<T>(T obj)
+        {
+            if (obj == null)
+                return null;
+
+            var content = RecursiveSerialize(obj);
+            if (content == null)
+                return null;
+
+            return Encoding.UTF8.GetBytes(content);
+        }
+
+        public T Deserialize<T>(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+                return default;
+
+            var content = Encoding.UTF8.GetString(data, 0, data.Length);
+            return (T)RecursiveDeserialize(typeof(T), content);
+        }
+
         private string RecursiveSerialize(object obj)
         {
             if (obj == null)
@@ -64,7 +96,6 @@ namespace MonsterSave.Runtime
 
             // 2.如果不是可序列化类型
             if (!type.IsSerializable)
-            {
                 if (TypeMgr.HasAdapter(type))
                 {
                     var adaptedValue = TypeMgr
@@ -72,11 +103,9 @@ namespace MonsterSave.Runtime
                         .ConvertToSerializable(obj);
                     return RecursiveSerialize(adaptedValue);
                 }
-            }
 
             // 3.如果是可序列化类型
             if (type.IsSerializable)
-            {
                 if (type.IsClass)
                 {
                     var properties = type.GetProperties();
@@ -84,7 +113,6 @@ namespace MonsterSave.Runtime
                     var dictionary = new Dictionary<string, string>();
 
                     foreach (var property in properties)
-                    {
                         if (property.CanRead && property.CanWrite)
                         {
                             var value = property.GetValue(obj);
@@ -92,10 +120,8 @@ namespace MonsterSave.Runtime
                             if (serializedValue != null)
                                 dictionary[property.Name] = serializedValue;
                         }
-                    }
 
                     foreach (var field in fields)
-                    {
                         if (field.IsPublic || field.IsStatic)
                         {
                             var value = field.GetValue(obj);
@@ -103,24 +129,11 @@ namespace MonsterSave.Runtime
                             if (serializedValue != null)
                                 dictionary[field.Name] = serializedValue;
                         }
-                    }
 
                     return RecursiveSerialize(dictionary);
                 }
-            }
 
             return string.Empty;
-        }
-
-        object ISerializer.Deserialize(Type type, byte[] data)
-        {
-            if (type == null)
-                return null;
-            if (data == null || data.Length == 0)
-                return null;
-
-            var content = Encoding.UTF8.GetString(data, 0, data.Length);
-            return RecursiveDeserialize(type, content);
         }
 
 
@@ -176,7 +189,6 @@ namespace MonsterSave.Runtime
 
             // 2. 不可序列化类型
             if (!type.IsSerializable)
-            {
                 // 首先尝试转型
                 if (TypeMgr.HasAdapter(type))
                 {
@@ -186,11 +198,9 @@ namespace MonsterSave.Runtime
                         .GetAdapter(type)
                         .ConvertFromSerializable(adaptedValue);
                 }
-            }
 
             // 3. 可序列化类型
             if (type.IsSerializable)
-            {
                 if (type.IsClass)
                 {
                     var adaptedValue =
@@ -203,55 +213,25 @@ namespace MonsterSave.Runtime
                     var fields = type.GetFields();
 
                     foreach (var property in properties)
-                    {
                         if (property.CanRead && property.CanWrite)
-                        {
                             if (adaptedValue.TryGetValue(property.Name, out var serializedValue))
                             {
                                 var value = RecursiveDeserialize(property.GetType(), serializedValue);
                                 property.SetValue(instance, value);
                             }
-                        }
-                    }
 
                     foreach (var field in fields)
-                    {
                         if (field.IsPublic || field.IsStatic)
-                        {
                             if (adaptedValue.TryGetValue(field.Name, out var serializedValue))
                             {
                                 var value = RecursiveDeserialize(field.GetType(), serializedValue);
                                 field.SetValue(instance, value);
                             }
-                        }
-                    }
 
                     return instance;
                 }
-            }
 
             return null;
-        }
-
-        public byte[] Serialize<T>(T obj)
-        {
-            if (obj == null)
-                return null;
-
-            var content = RecursiveSerialize(obj);
-            if (content == null)
-                return null;
-
-            return Encoding.UTF8.GetBytes(content);
-        }
-
-        public T Deserialize<T>(byte[] data)
-        {
-            if (data == null || data.Length == 0)
-                return default;
-
-            var content = Encoding.UTF8.GetString(data, 0, data.Length);
-            return (T)RecursiveDeserialize(typeof(T), content);
         }
 
         protected abstract string SerializeHandler(object serializable);

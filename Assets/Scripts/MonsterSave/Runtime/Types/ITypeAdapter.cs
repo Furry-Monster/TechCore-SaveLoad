@@ -2,7 +2,6 @@ using System;
 
 namespace MonsterSave.Runtime
 {
-
     public interface ITypeAdapter
     {
         public Type SourceType { get; }

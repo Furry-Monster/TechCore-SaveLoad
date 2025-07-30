@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MonsterSave.Runtime;
 using UnityEngine;
 
@@ -32,7 +31,7 @@ public class MonsterSaveTest : MonoBehaviour
 
         // 4. 删除
         MonsterSaveMgr.Delete("isAlive");
-        Debug.Log("After delete, isAlive: " + MonsterSaveMgr.Get<bool>("isAlive", false));
+        Debug.Log("After delete, isAlive: " + MonsterSaveMgr.Get<bool>("isAlive"));
         Debug.Log("Pass case 5");
     }
 }

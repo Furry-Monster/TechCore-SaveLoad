@@ -8,30 +8,37 @@ namespace MonsterSave.Editor
 {
     public class MonsterConfigWindow : EditorWindow
     {
-        private enum State
-        {
-            None,
-            Creating,
-            Modifying,
-        }
+        private string _createdApiKey;
+        private Backend _createdBackend;
+        private Cache _createdCache;
+        private int _createdCacheSize;
+        private Encryption _createdEncryption;
 
-        private MonsterSaveConfig _selectedConfig;
+        private string _createdFileName;
+        private Format _createdFormat;
+        private bool _createdInitialized;
+        private bool _createdScheduledSync;
+        private string _createdStoragePath;
         private State _currentState = State.None;
+        private string _editApiKey;
+        private Backend _editBackend;
+        private Cache _editCache;
+        private int _editCacheSize;
+        private Encryption _editEncryption;
+
+        private Format _editFormat;
+        private bool _editInitialized;
+        private bool _editScheduledSync;
+        private string _editStoragePath;
         private Vector2 _scrollPos;
 
-        [MenuItem("Tools/MonsterSave/PluginConfig")]
-        public static void ShowWindow()
-        {
-            GetWindow<MonsterConfigWindow>("MonsterSave Config");
-        }
+        private MonsterSaveConfig _selectedConfig;
 
         private void Awake()
         {
             if (_selectedConfig == null)
-            {
                 // 尝试加载默认配置
                 _selectedConfig = Resources.Load<MonsterSaveConfig>("DefaultConfig");
-            }
         }
 
         private void OnGUI()
@@ -70,6 +77,12 @@ namespace MonsterSave.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        [MenuItem("Tools/MonsterSave/PluginConfig")]
+        public static void ShowWindow()
+        {
+            GetWindow<MonsterConfigWindow>("MonsterSave Config");
+        }
+
         private void ShowMainView()
         {
             // 配置管理
@@ -80,51 +93,24 @@ namespace MonsterSave.Editor
                 typeof(MonsterSaveConfig),
                 false) as MonsterSaveConfig;
             EditorGUILayout.BeginHorizontal();
-            if (Button("新建配置", Width(100)))
-            {
-                _currentState = State.Creating;
-            }
+            if (Button("新建配置", Width(100))) _currentState = State.Creating;
 
-            if (Button("修改当前", Width(100)))
-            {
-                _currentState = State.Modifying;
-            }
+            if (Button("修改当前", Width(100))) _currentState = State.Modifying;
 
             if (Button("删除配置", Width(100)))
-            {
                 if (EditorUtility.DisplayDialog("确认删除", $"确定要删除配置 {_selectedConfig?.name} 吗？", "删除", "取消"))
-                {
                     DeleteConfig(_selectedConfig);
-                }
-            }
 
             EditorGUILayout.EndHorizontal();
 
             // 杂项功能
             Label("杂项", EditorStyles.boldLabel);
-            if (Button("插件测试"))
-            {
-                TestSaveLoad(_selectedConfig);
-            }
+            if (Button("插件测试")) TestSaveLoad(_selectedConfig);
 
-            if (Button("打开帮助文档"))
-            {
-                Application.OpenURL("https://github.com/your-plugin-doc-url");
-            }
+            if (Button("打开帮助文档")) Application.OpenURL("https://github.com/your-plugin-doc-url");
 
             Label("插件版本: 0.0.1", EditorStyles.miniLabel);
         }
-
-        private string _createdFileName;
-        private Format _createdFormat;
-        private Backend _createdBackend;
-        private Encryption _createdEncryption;
-        private Cache _createdCache;
-        private string _createdStoragePath;
-        private string _createdApiKey;
-        private bool _createdScheduledSync;
-        private int _createdCacheSize;
-        private bool _createdInitialized = false;
 
         private void ShowCreatingView()
         {
@@ -195,23 +181,10 @@ namespace MonsterSave.Editor
                 }
             }
 
-            if (Button("取消"))
-            {
-                _currentState = State.None;
-            }
+            if (Button("取消")) _currentState = State.None;
 
             EndHorizontal();
         }
-
-        private Format _editFormat;
-        private Backend _editBackend;
-        private Encryption _editEncryption;
-        private Cache _editCache;
-        private string _editStoragePath;
-        private string _editApiKey;
-        private bool _editScheduledSync;
-        private int _editCacheSize;
-        private bool _editInitialized = false;
 
         private void ShowModifyView()
         {
@@ -306,6 +279,13 @@ namespace MonsterSave.Editor
             JsonUtility.FromJsonOverwrite(json, temp);
             EditorUtility.DisplayDialog("测试结果", $"保存/加载模拟成功\n{json}", "确定");
             DestroyImmediate(temp);
+        }
+
+        private enum State
+        {
+            None,
+            Creating,
+            Modifying
         }
     }
 }
